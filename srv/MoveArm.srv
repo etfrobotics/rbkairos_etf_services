@@ -1,0 +1,5 @@
+geometry_msgs/Pose[] targets
+float32 timeout
+---
+bool success
+string message

@@ -4,7 +4,7 @@ import threading
 import time
 
 from geometry_msgs.msg import Pose
-from etf_robot_services.srv import MoveArm, MoveArmResponse
+from rbkairos_etf_services.srv import MoveArm, MoveArmResponse
 
 import moveit_commander
 from moveit_commander import RobotCommander, PlanningSceneInterface, MoveGroupCommander
