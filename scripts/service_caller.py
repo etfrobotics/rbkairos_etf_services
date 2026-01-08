@@ -73,8 +73,8 @@ if __name__ == "__main__":
     # domain_file = "/home/ruzamladji/catkin_ws/src/rbkairos_etf_services/problem_data/fruit_collection_domain.rddl"
     # instance_file = "/home/ruzamladji/catkin_ws/src/rbkairos_etf_services/problem_data/fruit_collection_inst.rddl"
 
-    domain_file = "/home/ruzamladji/catkin_ws/src/rbkairos_etf_services/problem_data/domain.rddl"
-    instance_file = "/home/ruzamladji/catkin_ws/src/rbkairos_etf_services/problem_data/instance.rddl"
+    domain_file = "/home/etf-robotics/catkin_ws/src/rbkairos_etf_services/problem_data/fruit_collection_domain.rddl"
+    instance_file = "/home/etf-robotics/catkin_ws/src/rbkairos_etf_services/problem_data/fruit_collection_inst.rddl"
     
     sc = ServiceCaller("Robotnik", domain_file, instance_file)
     sc.run()

@@ -1,4 +1,4 @@
-geometry_msgs/Pose[] targets
+geometry_msgs/PoseStamped[] targets
 float32 timeout
 ---
 bool success

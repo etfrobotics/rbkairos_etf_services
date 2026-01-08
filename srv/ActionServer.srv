@@ -1,0 +1,6 @@
+string action_id
+float64[6] input   # [x, y, z, R, P, Y]   (R,P,Y in radians)
+float64 timeout
+---
+bool success
+string message

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-import rospy
-import threading
 import time
+import rospy
 
 from geometry_msgs.msg import Pose
 from rbkairos_etf_services.srv import MoveArm, MoveArmResponse
@@ -14,81 +13,59 @@ class MoveArmServiceNode:
     def __init__(self):
         rospy.init_node("move_arm_service_node", anonymous=False)
 
-        self.group_name = rospy.get_param("~move_group", "arm")
-        self.ee_link = rospy.get_param("~ee_link", None)  # optional
-        self.max_vel = rospy.get_param("~max_velocity_scaling", 0.3)
-        self.max_acc = rospy.get_param("~max_acceleration_scaling", 0.3)
+        self.default_timeout = 10 # seconds
+        self.default_planning_time = 2
 
-        moveit_commander.roscpp_initialize([])
         self.robot = RobotCommander()
         self.scene = PlanningSceneInterface()
+        self.group_name = "arm"  # Replace with your MoveIt group name
         self.move_group = MoveGroupCommander(self.group_name)
+        self.move_group.set_planning_time(self.default_planning_time)
+        self.move_group.set_max_acceleration_scaling_factor(0.8)
+        self.move_group.set_max_velocity_scaling_factor(0.6)
 
-        if self.ee_link:
-            self.move_group.set_end_effector_link(self.ee_link)
+        self.world_frame = "fr3_link0"
 
-        self.move_group.set_max_velocity_scaling_factor(self.max_vel)
-        self.move_group.set_max_acceleration_scaling_factor(self.max_acc)
-
-        self._lock = threading.Lock()
 
         self.srv = rospy.Service("move_arm", MoveArm, self.handle_move_arm)
-        rospy.loginfo("MoveArm service ready on ~move_arm (service name: /move_arm if in global ns).")
-
-    def _execute_pose(self, pose: Pose, done_event: threading.Event, result_holder: dict):
-        """
-        Runs MoveIt planning/execution in a thread so we can enforce a timeout from the service callback.
-        """
-        try:
-            with self._lock:
-                self.move_group.set_pose_target(pose)
-                ok = self.move_group.go(wait=True)
-                self.move_group.stop()
-                self.move_group.clear_pose_targets()
-
-            result_holder["ok"] = bool(ok)
-            result_holder["msg"] = "Reached target pose." if ok else "MoveIt failed to reach target pose."
-        except Exception as e:
-            result_holder["ok"] = False
-            result_holder["msg"] = f"Exception during MoveIt execution: {e}"
-        finally:
-            done_event.set()
+        rospy.loginfo("MoveArm service ready on /move_arm")
 
     def handle_move_arm(self, req):
-        if req.timeout <= 0.0:
-            timeout_s = 30.0
-        else:
-            timeout_s = float(req.timeout)
+        timeout_s = float(req.timeout) if req.timeout > 0.0 else float(self.default_timeout)
 
-        if len(req.targets) == 0:
+        if not req.targets:
             return MoveArmResponse(False, "No targets provided.")
 
         start_time = time.time()
 
         for i, target_pose in enumerate(req.targets):
-            remaining = timeout_s - (time.time() - start_time)
+
+            target_pose.header.frame_id = self.world_frame
+            target_pose.header.stamp = rospy.Time.now()
+
+            elapsed = time.time() - start_time
+            remaining = timeout_s - elapsed
             if remaining <= 0.0:
                 return MoveArmResponse(False, f"Timeout before executing target {i}.")
 
-            done = threading.Event()
-            result_holder = {"ok": False, "msg": ""}
+            # Limit planning time based on remaining time (but don't set it too low)
+            planning_time = max(1.0, min(self.default_planning_time, remaining))
+            self.move_group.set_planning_time(planning_time)
 
-            th = threading.Thread(target=self._execute_pose, args=(target_pose, done, result_holder))
-            th.daemon = True
-            th.start()
+            try:
+                self.move_group.set_pose_target(target_pose)
+                ok = self.move_group.go(wait=True)
+            except Exception as e:
+                self.move_group.stop()
+                self.move_group.clear_pose_targets()
+                return MoveArmResponse(False, f"Exception while executing target {i}: {e}")
+            finally:
+                # Always clean up targets
+                self.move_group.stop()
+                self.move_group.clear_pose_targets()
 
-            if not done.wait(timeout=remaining):
-                # Timed out: attempt to stop
-                try:
-                    with self._lock:
-                        self.move_group.stop()
-                        self.move_group.clear_pose_targets()
-                except Exception:
-                    pass
-                return MoveArmResponse(False, f"Timeout while executing target {i}. Stopped motion.")
-
-            if not result_holder["ok"]:
-                return MoveArmResponse(False, f"Target {i} failed: {result_holder['msg']}")
+            if not ok:
+                return MoveArmResponse(False, f"Target {i} failed: MoveIt could not reach target pose.")
 
         return MoveArmResponse(True, f"Successfully executed {len(req.targets)} target pose(s).")
 
