@@ -1,0 +1,81 @@
+<launch>
+
+  <!-- ========================= -->
+  <!-- Common arguments -->
+  <!-- ========================= -->
+  <arg name="world_frame" default="fr3_link0" />
+
+  <!-- Service names -->
+  <arg name="move_base_service" default="/move_base" />
+  <arg name="move_arm_service"  default="/move_arm" />
+
+  <!-- Command manager topics (base service wrapper) -->
+  <arg name="command_topic" default="/robot/command_manager/command" />
+  <arg name="status_topic"  default="/robot/command_manager/status" />
+
+  <!-- Franka gripper action -->
+  <arg name="gripper_action" default="/robot/arm/franka_gripper/move" />
+
+  <!-- ========================= -->
+  <!-- Move Base Service Node -->
+  <!-- ========================= -->
+  <node pkg="rbkairos_etf_services"
+        type="move_rbkairos.py"
+        name="move_base_service_node"
+        output="screen">
+
+    <!-- These are PRIVATE params (~param_name) used by the script -->
+    <param name="command_topic" value="$(arg command_topic)" />
+    <param name="status_topic"  value="$(arg status_topic)" />
+
+    <!-- Optional: run in namespace if needed -->
+    <!-- <remap from="move_base" to="$(arg move_base_service)" /> -->
+  </node>
+
+
+  <!-- ========================= -->
+  <!-- Move Arm Service Node -->
+  <!-- ========================= -->
+  <node pkg="rbkairos_etf_services"
+        type="move_moveit_fr3.py"
+        name="move_arm_service_node"
+        output="screen">
+
+    <!-- Optional private params you might add later -->
+    <!-- <param name="world_frame" value="$(arg world_frame)" /> -->
+    <!-- <param name="default_timeout" value="10.0" /> -->
+    <!-- <param name="default_planning_time" value="2.0" /> -->
+
+  </node>
+
+
+  <!-- ========================= -->
+  <!-- Action Server Node -->
+  <!-- ========================= -->
+  <node pkg="rbkairos_etf_services"
+        type="action_manager.py"
+        name="action_server_node"
+        output="screen">
+
+    <!-- Service clients -->
+    <param name="move_base_service" value="$(arg move_base_service)" />
+    <param name="move_arm_service"  value="$(arg move_arm_service)" />
+
+    <!-- Frames -->
+    <param name="world_frame" value="$(arg world_frame)" />
+
+    <!-- Franka gripper -->
+    <param name="gripper_action" value="$(arg gripper_action)" />
+    <param name="gripper_open_width" value="0.08" />
+    <param name="gripper_closed_width" value="0.0" />
+    <param name="gripper_speed" value="0.1" />
+
+    <!-- Arm poses: [x,y,z,roll,pitch,yaw] -->
+    <param name="arm_home"    value="[0.4, 0.0, 0.4, 0.0, 3.14, 0.0]" />
+    <param name="bin_pose"    value="[0.25, -0.35, 0.25, 0.0, 3.14, 0.0]" />
+    <param name="unload_pose" value="[0.30, 0.35, 0.25, 0.0, 3.14, 0.0]" />
+
+  </node>
+
+</launch>
+
