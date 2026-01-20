@@ -279,5 +279,5 @@ class ActionManagerNode:
 
 
 if __name__ == "__main__":
-    ActionOrchestratorNode()
+    ActionManagerNode()
     rospy.spin()
