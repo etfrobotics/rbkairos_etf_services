@@ -258,25 +258,25 @@ class ActionManagerNode:
             ok = False
             msg = ""
             
-            if action_id == "NAVIGATE":
+            if action_id == "navigate":
                 ok, msg = self.action_navigate(arr, timeout=min(self.base_step_timeout, timeout_s))
 
-            elif action_id == "GRASP":
+            elif action_id == "grasp_fruit":
                 ok, msg = self.action_grasp(arr, timeout=timeout_s)
 
-            elif action_id == "LOAD_TO_BIN":
+            elif action_id == "load_to_bin":
                 ok, msg = self.action_load_to_bin(action_id, timeout=timeout_s)
 
-            elif action_id == "NAVIGATE_TO_UNLOADING_STATION":
+            elif action_id == "navigate_to_unloading_station":
                 # exactly like NAVIGATE, but you can keep it separate if you want different logging/logic
                 ok, msg = self.action_navigate(arr, timeout=min(self.base_step_timeout, timeout_s))
 
-            elif action_id == "UNLOAD":
+            elif action_id == "unload":
                 ok, msg = self.action_unload(action_id, timeout=timeout_s)
 
             else:
                 ok = False
-                msg = f"Unknown action_id '{action_id}'. Supported: NAVIGATE, GRASP, LOAD_TO_BIN, NAVIGATE_TO_UNLOADING_STATION, UNLOAD"
+                msg = f"Unknown action_id '{action_id}'. Supported: navigate, grasp_fruit, load_to_bin, navigate_to_unloading_station, unload"
 
             # Checks if the service performed the action in the software, 
             # and also if the current action was perfomed by the robot in the real world

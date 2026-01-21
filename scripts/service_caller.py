@@ -56,10 +56,10 @@ class ServiceCaller:
         while True:
 
             rospy.loginfo("Sending Observations and rewards to the planner . . .")
-            #TODO: Check this output, and map it accordingly
-            #TODO: Add a json file to map the actual values of x,y,z,r,p,y to the planners abstract locations
             
             action_to_take = self.submit_obs(self.obs, self.reward)
+            #TODO: Check this output, and map it accordingly
+            #TODO: Add a json file to map the actual values of x,y,z,r,p,y to the planners abstract locations
             
             rospy.loginfo("Performing action . . .")
             #TODO: Check if there is another mapping needed here, for the concrete values of x,y,z,r,p,y. Relate the locations with the planner
@@ -67,7 +67,8 @@ class ServiceCaller:
 
             observed_action = self.evaluator.create_observation_template()
 
-            observed_action[action_to_take.action_name] = success
+            #TODO: Add the locations of the updated action fluents (it needs an index to know which location was updated)
+            observed_action[action_to_take.action_name][0] = success
 
             next_obs = self.evaluator.step(self.obs, observed_action)
     
