@@ -49,11 +49,11 @@ class ServiceCaller:
         self.obs['position_visited'] = np.array(self.evaluator.env.model._state_fluents['position_visited'])
 
         self.reward = 0.0
-        self.count = 0
+
         
     def run(self):
 
-        while self.count < self.HORIZON_LENGTH:
+        while True:
 
             rospy.loginfo("Sending Observations and rewards to the planner . . .")
             #TODO: Check this output, and map it accordingly
@@ -83,7 +83,7 @@ class ServiceCaller:
             self.obs = next_obs
             self.reward = reward
 
-            self.count += 1
+
 
 if __name__ == "__main__":
 
