@@ -49,6 +49,7 @@ class ServiceCaller:
         self.obs['position_visited'] = np.array(self.evaluator.env.model._state_fluents['position_visited'])
 
         self.reward = 0.0
+        self.count = 0
         
     def run(self):
 
@@ -81,6 +82,8 @@ class ServiceCaller:
             # Update the current observation and the previous reward for the planner at the start of the next iteration
             self.obs = next_obs
             self.reward = reward
+
+            self.count += 1
 
 if __name__ == "__main__":
 
