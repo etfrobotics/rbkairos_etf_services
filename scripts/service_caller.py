@@ -19,8 +19,12 @@ class ServiceCaller:
         rospy.wait_for_service('/prost_bridge/start_planning')
         rospy.wait_for_service('/prost_bridge/submit_observation')
 
+        rospy.wait_for_service('/action_server')
+
         self.start_planning = rospy.ServiceProxy('/prost_bridge/start_planning', StartPlanning)
         self.submit_obs = rospy.ServiceProxy('/prost_bridge/submit_observation', SubmitObservation)
+
+        self.perform_action = rospy.ServiceProxy('/action_server', ActionServer)
 
         with open(domain_file, 'r') as f:
             self.domain = f.read()
@@ -43,32 +47,40 @@ class ServiceCaller:
         self.obs['fruits_unloaded'] = np.array(self.evaluator.env.model._state_fluents['fruits_unloaded'])
         self.obs['robot_at'] = np.array(self.evaluator.env.model._state_fluents['robot_at'])
         self.obs['position_visited'] = np.array(self.evaluator.env.model._state_fluents['position_visited'])
-        
-        self.count = 0
-        rospy.loginfo("Sending init state . . .")
-        self.act_resp = self.submit_obs(self.obs, 0.0) # Init reward is 0.0
-        
-        self.HORIZON_LENGTH = 150
-        
+
+        self.reward = 0.0
         
     def run(self):
 
         while self.count < self.HORIZON_LENGTH:
 
-            self.evaluator.step(self.act_resp.action_name, self.act_resp.action_params, self.count)
+            rospy.loginfo("Sending Observations and rewards to the planner . . .")
+            #TODO: Check this output, and map it accordingly
+            #TODO: Add a json file to map the actual values of x,y,z,r,p,y to the planners abstract locations
             
-            # Reward: 0 if goal reached, -1 otherwise (as per domain file)
-            # reward = [sum_{?x : xpos, ?y : ypos} -(GOAL(?x,?y) ^ ~robot-at(?x,?y))]; 
-            # So if NOT at goal, reward is -1. If at goal, reward is 0 (assuming goal is unique).
+            action_to_take = self.submit_obs(self.obs, self.reward)
             
-            reward = -1.0 
+            rospy.loginfo("Performing action . . .")
+            #TODO: Check if there is another mapping needed here, for the concrete values of x,y,z,r,p,y. Relate the locations with the planner
+            success = self.perform_action(action_to_take.action_name, action_to_take.action_params)
+
+            observed_action = self.evaluator.create_observation_template()
+
+            observed_action[action_to_take.action_name] = success
+
+            next_obs = self.evaluator.step(self.obs, observed_action)
+    
+            reward = self.evaluator.evaluate_reward(self.obs, next_obs)
+
+
             if self.evaluator.env.model._state_fluents['goal_reached']:
                 reward = 0.0
                 rospy.loginfo("Sim finished")
                 break
-                
-            self.act_resp = self.submit_obs(self.obs, reward)
-            self.count += 1
+
+            # Update the current observation and the previous reward for the planner at the start of the next iteration
+            self.obs = next_obs
+            self.reward = reward
 
 if __name__ == "__main__":
 
