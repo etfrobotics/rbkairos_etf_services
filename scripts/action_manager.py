@@ -5,6 +5,7 @@ import actionlib
 import tf.transformations as tf_trans
 
 from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Bool
 
 from rbkairos_etf_services.srv import MoveBase, MoveBaseRequest, MoveArm, MoveArmRequest
 from rbkairos_etf_services.srv import ActionServer, ActionServerResponse
@@ -58,9 +59,16 @@ class ActionManagerNode:
         self.gripper_client.wait_for_server()
         rospy.loginfo("Gripper action server connected.")
 
+        # ---------- Feedback Subscriber ----------
+        self.feedback_sub = rospy.Subscriber("/action_feedback", Bool, self.feedback_callback)
+        self.feedback = False
+
         # ---------- Service ----------
         self.srv = rospy.Service("action_server", ActionServer, self.handle_action)
         rospy.loginfo("ActionOrchestrator service ready on /action_server")
+
+    def feedback_callback(self, msg):
+        self.feedback = msg.data
 
     # -------------------------------------------------------------------------
     # Helpers
@@ -233,11 +241,13 @@ class ActionManagerNode:
     # -------------------------------------------------------------------------
     # Service handler
     # -------------------------------------------------------------------------
+
     def handle_action(self, req):
         action_id = req.action_id.strip().upper()
         arr = list(req.input)
 
         if len(arr) != 6:
+            self.feedback_pub.publish(False)
             return ActionServerResponse(False, "Input must be float64[6] = [x,y,z,R,P,Y]")
 
         timeout_s = float(req.timeout) if req.timeout > 0.0 else self.default_timeout
@@ -245,38 +255,39 @@ class ActionManagerNode:
         rospy.loginfo(f"ActionServer request: action_id={action_id}, input={arr}, timeout={timeout_s}")
 
         try:
+            ok = False
+            msg = ""
+            
             if action_id == "NAVIGATE":
                 ok, msg = self.action_navigate(arr, timeout=min(self.base_step_timeout, timeout_s))
-                return ActionServerResponse(ok, msg)
 
             elif action_id == "GRASP":
                 ok, msg = self.action_grasp(arr, timeout=timeout_s)
-                return ActionServerResponse(ok, msg)
 
             elif action_id == "LOAD_TO_BIN":
                 ok, msg = self.action_load_to_bin(action_id, timeout=timeout_s)
-                return ActionServerResponse(ok, msg)
 
             elif action_id == "NAVIGATE_TO_UNLOADING_STATION":
                 # exactly like NAVIGATE, but you can keep it separate if you want different logging/logic
                 ok, msg = self.action_navigate(arr, timeout=min(self.base_step_timeout, timeout_s))
-                return ActionServerResponse(ok, msg)
 
             elif action_id == "UNLOAD":
                 ok, msg = self.action_unload(action_id, timeout=timeout_s)
-                return ActionServerResponse(ok, msg)
 
             else:
-                return ActionServerResponse(
-                    False,
-                    f"Unknown action_id '{action_id}'. Supported: NAVIGATE, GRASP, LOAD_TO_BIN, NAVIGATE_TO_UNLOADING_STATION, UNLOAD"
-                )
+                ok = False
+                msg = f"Unknown action_id '{action_id}'. Supported: NAVIGATE, GRASP, LOAD_TO_BIN, NAVIGATE_TO_UNLOADING_STATION, UNLOAD"
 
-        except rospy.ServiceException as e:
-            return ActionServerResponse(False, f"Service call failed: {e}")
-        except Exception as e:
-            return ActionServerResponse(False, f"Unhandled exception: {e}")
+            # Checks if the service performed the action in the software, 
+            # and also if the current action was perfomed by the robot in the real world
+            
+            # Waits for the feedback from the task detection
+            time.sleep(1)
 
+            # If the feedback is not received in 1 second, the action is considered as failed
+            real_ok = ok and self.feedback
+        
+            return ActionServerResponse(real_ok, msg)
 
 if __name__ == "__main__":
     ActionManagerNode()

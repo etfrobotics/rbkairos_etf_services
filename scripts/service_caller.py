@@ -9,7 +9,7 @@ from prost_ros.srv import StartPlanning, SubmitObservation
 
 # Package Imports
 
-from sim_interface import SimInterface
+from evaluator import FruitHarvestingRewardEvaluator
 
 class ServiceCaller:
 
@@ -32,40 +32,43 @@ class ServiceCaller:
         if not self.resp.success:
             rospy.logerr("PROST server failed")
 
-        si = SimInterface()
-        self.sim = si.robot_sim(robot_id=robot_id)
+        self.evaluator = FruitHarvestingRewardEvaluator()
 
         # Initial action state
+        self.obs = self.evaluator.create_observation_template()
+
+        self.obs['fruit_at'] = np.array(self.evaluator.env.model._state_fluents['fruit_at'])
+        self.obs['fruit_collected'] = np.array(self.evaluator.env.model._state_fluents['fruit_collected'])
+        self.obs['fruit_in_bin'] = np.array(self.evaluator.env.model._state_fluents['fruit_in_bin'])
+        self.obs['fruits_unloaded'] = np.array(self.evaluator.env.model._state_fluents['fruits_unloaded'])
+        self.obs['robot_at'] = np.array(self.evaluator.env.model._state_fluents['robot_at'])
+        self.obs['position_visited'] = np.array(self.evaluator.env.model._state_fluents['position_visited'])
         
         self.count = 0
-        self.obs = self.sim.get_obs()
         rospy.loginfo("Sending init state . . .")
         self.act_resp = self.submit_obs(self.obs, 0.0) # Init reward is 0.0
         
         self.HORIZON_LENGTH = 150
-        self.TERMINATION_STRING = "ROUND_END"
+        
         
     def run(self):
 
-        rospy.loginfo(self.act_resp.action_name)
-        while self.act_resp.action_name != self.TERMINATION_STRING and self.count < self.HORIZON_LENGTH:
+        while self.count < self.HORIZON_LENGTH:
 
-            self.sim.step(self.act_resp.action_name, self.act_resp.action_params, self.count)
-            obs = self.sim.get_obs()
+            self.evaluator.step(self.act_resp.action_name, self.act_resp.action_params, self.count)
             
             # Reward: 0 if goal reached, -1 otherwise (as per domain file)
             # reward = [sum_{?x : xpos, ?y : ypos} -(GOAL(?x,?y) ^ ~robot-at(?x,?y))]; 
             # So if NOT at goal, reward is -1. If at goal, reward is 0 (assuming goal is unique).
             
             reward = -1.0 
-            if self.sim.terminate:
+            if self.evaluator.env.model._state_fluents['goal_reached']:
                 reward = 0.0
                 rospy.loginfo("Sim finished")
                 break
                 
-            self.act_resp = self.submit_obs(obs, reward)
+            self.act_resp = self.submit_obs(self.obs, reward)
             self.count += 1
-            rospy.loginfo(self.act_resp.action_name)
 
 if __name__ == "__main__":
 

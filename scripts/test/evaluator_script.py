@@ -278,6 +278,11 @@ if __name__ == "__main__":
     domain_file = "problem_data/fruit_collection_domain.rddl"
     instance_file = "problem_data/fruit_collection_inst.rddl"
 
+    env = RDDLEnv(
+        domain=domain_file,
+        instance=instance_file
+    )
+
     print("=" * 70)
     print("Fruit Harvesting Reward Evaluator - Single Step Simulation")
     print("=" * 70)
@@ -285,15 +290,26 @@ if __name__ == "__main__":
     # Initialize the evaluator
     evaluator = FruitHarvestingRewardEvaluator(domain_file, instance_file)
     
+    print(f"\nEnvironment Info:")
+    print(f"  Number of locations: {evaluator.num_locations}")
+    print(f"  Number of positions: {evaluator.num_positions}")
+    print(f"  Max capacity: {evaluator.max_capacity}")
+    print(f"  Capacity threshold: {evaluator.capacity_threshold}")
+    
+    # Create initial state from env.model initial state
+    print("\n" + "=" * 70)
+    print("INITIAL STATE (t=0)")
+    print("=" * 70)
+    
     initial_obs = evaluator.create_observation_template()
     
     # Set initial state from model
-    initial_obs['fruit_at'] = np.array(evaluator.env.model._state_fluents['fruit_at'])
-    initial_obs['fruit_collected'] = np.array(evaluator.env.model._state_fluents['fruit_collected'])
-    initial_obs['fruit_in_bin'] = np.array(evaluator.env.model._state_fluents['fruit_in_bin'])
-    initial_obs['fruits_unloaded'] = np.array(evaluator.env.model._state_fluents['fruits_unloaded'])
-    initial_obs['robot_at'] = np.array(evaluator.env.model._state_fluents['robot_at'])
-    initial_obs['position_visited'] = np.array(evaluator.env.model._state_fluents['position_visited'])
+    initial_obs['fruit_at'] = np.array(env.model._state_fluents['fruit_at'])
+    initial_obs['fruit_collected'] = np.array(env.model._state_fluents['fruit_collected'])
+    initial_obs['fruit_in_bin'] = np.array(env.model._state_fluents['fruit_in_bin'])
+    initial_obs['fruits_unloaded'] = np.array(env.model._state_fluents['fruits_unloaded'])
+    initial_obs['robot_at'] = np.array(env.model._state_fluents['robot_at'])
+    initial_obs['position_visited'] = np.array(env.model._state_fluents['position_visited'])
     
     print(f"Robot at position: {np.where(initial_obs['robot_at'])[0]}")
     print(f"Fruits at locations: {np.sum(initial_obs['fruit_at'])}/{evaluator.num_locations}")
@@ -301,27 +317,72 @@ if __name__ == "__main__":
     print(f"Fruits in bin: {np.sum(initial_obs['fruit_in_bin'])}")
     print(f"Current bin load: {evaluator.bin_load(initial_obs['fruit_in_bin']):.2f}")
     
-    # Action sequence: navigate to adjacent position, grasp fruit, load to bin, unload (Here we assume that the response was true for 
-    # all actions, this is just to demonstrate this module. In the integration with the service caller, the action server returns the 
-    # response of each action, and we can use this to update the observation)
-
+    # Define a random action
+    print("\n" + "=" * 70)
+    print("ACTION (at t=0)")
+    print("=" * 70)
+    
     action = evaluator.create_observation_template()
     
+    # Random action: navigate to adjacent position
     current_pos = np.where(initial_obs['robot_at'])[0][0]
     
+    # Find adjacent positions
     adjacent_positions = np.where(evaluator.adjacent[current_pos])[0]
-
-    target_pos = adjacent_positions[0]
-    action['navigate'][target_pos] = True
-    action['grasp_fruit'][target_pos] = True
-    action['load_to_bin'][target_pos] = True
-    action['unload'] = True
-
+    if len(adjacent_positions) > 0:
+        # Pick first adjacent position (or random)
+        target_pos = adjacent_positions[0]
+        action['navigate'][target_pos] = True
+        print(f"Action: Navigate from position {current_pos} to position {target_pos}")
+        print(f"Distance: {evaluator.distance[current_pos, target_pos]:.2f}")
+    else:
+        # If no adjacent, try to grasp fruit at reachable location
+        robot_pos = np.where(initial_obs['robot_at'])[0][0]
+        reachable_locs = np.where(evaluator.reachable_from[:, robot_pos])[0]
+        available_fruits = reachable_locs[initial_obs['fruit_at'][reachable_locs]]
+        
+        if len(available_fruits) > 0:
+            target_loc = available_fruits[0]
+            action['grasp_fruit'][target_loc] = True
+            print(f"Action: Grasp fruit at location {target_loc}")
+    
+    # Simulate the step
+    print("\n" + "=" * 70)
+    print("SIMULATING STEP...")
+    print("=" * 70)
+    
+    # Add action to initial_obs for reward calculation
+    initial_obs['grasp_fruit'] = action['grasp_fruit'].copy()
+    initial_obs['load_to_bin'] = action['load_to_bin'].copy()
+    initial_obs['navigate'] = action['navigate'].copy()
+    initial_obs['unload'] = action['unload']
     
     # Simulate next state
     next_obs = evaluator.step(initial_obs, action)
     
-    reward = evaluator.evaluate_reward(initial_obs, next_obs)
-
-    print(f"Reward: {reward}")
+    print("\n" + "=" * 70)
+    print("NEXT STATE (t=1)")
+    print("=" * 70)
     
+    print(f"Robot at position: {np.where(next_obs['robot_at'])[0]}")
+    print(f"Fruits at locations: {np.sum(next_obs['fruit_at'])}/{evaluator.num_locations}")
+    print(f"Fruits collected: {np.sum(next_obs['fruit_collected'])}")
+    print(f"Fruits in bin: {np.sum(next_obs['fruit_in_bin'])}")
+    print(f"Current bin load: {evaluator.bin_load(next_obs['fruit_in_bin']):.2f}")
+    
+    # Calculate reward
+    print("\n" + "=" * 70)
+    print("REWARD CALCULATION")
+    print("=" * 70)
+    
+    reward = evaluator.evaluate_reward(initial_obs, next_obs)
+    
+    print(f"\nReward for this step: {reward:.4f}")
+    
+    print("\n" + "=" * 70)
+    print("Summary:")
+    print("  - Initial state loaded from env.model")
+    print("  - Random action selected (navigate or grasp)")
+    print("  - Next state simulated")
+    print("  - Reward calculated based on state transition")
+    print("=" * 70)
