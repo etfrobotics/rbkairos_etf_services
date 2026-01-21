@@ -303,7 +303,7 @@ if __name__ == "__main__":
     
     # Action sequence: navigate to adjacent position, grasp fruit, load to bin, unload (Here we assume that the response was true for 
     # all actions, this is just to demonstrate this module. In the integration with the service caller, the action server returns the 
-    # response of each action, and we can use this to update the observation)
+    # response of each action, and we can use this to update the observation). 
 
     action = evaluator.create_observation_template()
     
