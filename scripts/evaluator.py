@@ -275,8 +275,8 @@ class FruitHarvestingRewardEvaluator:
 
 if __name__ == "__main__":
 
-    domain_file = "problem_data/fruit_collection_domain.rddl"
-    instance_file = "problem_data/fruit_collection_inst.rddl"
+    domain_file = "problem_data/domain.rddl"
+    instance_file = "problem_data/instance.rddl"
 
     print("=" * 70)
     print("Fruit Harvesting Reward Evaluator - Single Step Simulation")
@@ -294,7 +294,9 @@ if __name__ == "__main__":
     initial_obs['fruits_unloaded'] = np.array(evaluator.env.model._state_fluents['fruits_unloaded'])
     initial_obs['robot_at'] = np.array(evaluator.env.model._state_fluents['robot_at'])
     initial_obs['position_visited'] = np.array(evaluator.env.model._state_fluents['position_visited'])
-    
+
+    print(evaluator)
+
     print(f"Robot at position: {np.where(initial_obs['robot_at'])[0]}")
     print(f"Fruits at locations: {np.sum(initial_obs['fruit_at'])}/{evaluator.num_locations}")
     print(f"Fruits collected: {np.sum(initial_obs['fruit_collected'])}")

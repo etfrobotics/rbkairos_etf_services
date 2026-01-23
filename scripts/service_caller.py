@@ -10,9 +10,9 @@ from prost_ros.srv import StartPlanning, SubmitObservation
 # Package Imports
 
 from evaluator import FruitHarvestingRewardEvaluator
+import numpy as np
 
 class ServiceCaller:
-
     def __init__(self, robot_id, domain_file, instance_file):
         rospy.init_node("prost_service_caller")
 
@@ -50,6 +50,10 @@ class ServiceCaller:
 
         self.reward = 0.0
 
+        # Load the actions.json action to experiment data
+        with open("actions.json", "r", encoding="utf-8") as f:
+            self.ACTION_DATA = json.load(f)
+
         
     def run(self):
 
@@ -58,17 +62,16 @@ class ServiceCaller:
             rospy.loginfo("Sending Observations and rewards to the planner . . .")
             
             action_to_take = self.submit_obs(self.obs, self.reward)
-            #TODO: Check this output, and map it accordingly
-            #TODO: Add a json file to map the actual values of x,y,z,r,p,y to the planners abstract locations
+            #TODO: CHECK THE OUTPUT OF THE PLANNER
+            graph_idx = action_to_take.action_params
+            
+            action_to_take_data = self.ACTION_DATA[action_to_take.action_name][np.where(graph_idx == True)]
             
             rospy.loginfo("Performing action . . .")
-            #TODO: Check if there is another mapping needed here, for the concrete values of x,y,z,r,p,y. Relate the locations with the planner
-            success = self.perform_action(action_to_take.action_name, action_to_take.action_params)
+            success = self.perform_action(action_to_take.action_name, action_to_take_data)
 
             observed_action = self.evaluator.create_observation_template()
-
-            #TODO: Add the locations of the updated action fluents (it needs an index to know which location was updated)
-            observed_action[action_to_take.action_name][0] = success
+            observed_action[action_to_take.action_name][np.where(graph_idx == True)] = success
 
             next_obs = self.evaluator.step(self.obs, observed_action)
     
@@ -92,8 +95,8 @@ if __name__ == "__main__":
     # domain_file = "/home/ruzamladji/catkin_ws/src/rbkairos_etf_services/problem_data/fruit_collection_domain.rddl"
     # instance_file = "/home/ruzamladji/catkin_ws/src/rbkairos_etf_services/problem_data/fruit_collection_inst.rddl"
 
-    domain_file = "/home/etf-robotics/catkin_ws/src/rbkairos_etf_services/problem_data/fruit_collection_domain.rddl"
-    instance_file = "/home/etf-robotics/catkin_ws/src/rbkairos_etf_services/problem_data/fruit_collection_inst.rddl"
+    domain_file = "/home/etf-robotics/catkin_ws/src/rbkairos_etf_services/problem_data/domain.rddl"
+    instance_file = "/home/etf-robotics/catkin_ws/src/rbkairos_etf_services/problem_data/instance.rddl"
     
     sc = ServiceCaller("Robotnik", domain_file, instance_file)
     sc.run()

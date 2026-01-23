@@ -1,124 +1,238 @@
-////////////////////////////////////////////////////////////////////
-//
-// Navigation MDP
-//
-// Author: Scott Sanner (ssanner [at] gmail.com)
-//
-// In a grid, a robot (R) must get to a goal (G).  Every cell offers
-// the robot a (different) chance of disappearing.  The robot needs
-// to choose a path which gets it to the goal most reliably within
-// the finite horizon time.
-//
-// ***********************
-// *  0   0   0   0   R  * 
-// * .1  .3  .5  .7  .9  *
-// * .1  .3  .5  .7  .9  * 
-// * .1  .3  .5  .7  .9  *
-// * .1  .3  .5  .7  .9  *
-// *  0   0   0   0   G  * 
-// ***********************
-//
-// This is a good domain to test deteminized planners because
-// one can see here that the path using the .3 chance of failure
-// leads to a 1-step most likely outcome of survival, but
-// a poor 4-step change of survival (.7^(.4)) whereas the path
-// using a .1 chance of failure is much more safe.
-//
-// The domain generators for navigation have a flag to produce slightly 
-// obfuscated files to discourage hand-coded policies, but 
-// rddl.viz.NavigationDisplay can properly display these grids, e.g.,
-//
-//  ./run rddl.sim.Simulator files/final_comp/rddl rddl.policy.RandomBoolPolicy 
-//        navigation_inst_mdp__1 rddl.viz.NavigationDisplay
-//
-// (Movement was not made stochastic due to the lack of intermediate
-//  variables and synchronic arcs to support both the PPDDL and SPUDD 
-//  translations.)
-// 
-////////////////////////////////////////////////////////////////////
-domain navigation_mdp {
+domain fruit_collection {
+    
     requirements = {
-//      constrained-state,
+        concurrent,
         reward-deterministic
     };
     
     types {
-        xpos : object;
-        ypos : object;
+        location : object;         
+        aisle_position : object;   
     };
     
     pvariables {
-        NORTH(ypos, ypos) : {non-fluent, bool, default = false};
-        SOUTH(ypos, ypos) : {non-fluent, bool, default = false};
-        EAST(xpos, xpos)  : {non-fluent, bool, default = false};
-        WEST(xpos, xpos)  : {non-fluent, bool, default = false};
-        MIN-XPOS(xpos) : {non-fluent, bool, default = false};
-        MAX-XPOS(xpos) : {non-fluent, bool, default = false};
-        MIN-YPOS(ypos) : {non-fluent, bool, default = false};
-        MAX-YPOS(ypos) : {non-fluent, bool, default = false};
+        
+       
+        unload_station(aisle_position) : { non-fluent, bool, default = false };
+        adjacent(aisle_position, aisle_position) : { non-fluent, bool, default = false };
+        reachable_from(location, aisle_position) : { non-fluent, bool, default = false };
+        distance(aisle_position, aisle_position) : { non-fluent, real, default = 1.0 };
+        
+        fruit_weight(location) : { non-fluent, real, default = 1.0 };
+        fruit_ripe(location) : { non-fluent, bool, default = true };
+        
+        GRASP_SUCCESS_PROB : { non-fluent, real, default = 0.9};
+        MAX_CAPACITY : { non-fluent, real, default = 100.0};
+        CAPACITY_THRESHOLD : { non-fluent, real, default = 90.0};
+        MAX_FRUIT_WEIGHT : { non-fluent, real, default = 2.0 };
     
-        P(xpos, ypos) : {non-fluent, real, default = 0.0};
+        // robot current position
+        robot_at(aisle_position) : { state-fluent, bool, default = false };
         
-        GOAL(xpos,ypos) : {non-fluent, bool, default = false};
+        // Fruit states
+        fruit_at(location) : { state-fluent, bool, default = false };              
+        fruit_collected(location) : { state-fluent, bool, default = false };       
+        fruit_in_bin(location) : { state-fluent, bool, default = false };          
+        fruits_unloaded(location) : { state-fluent, bool, default = false };       
         
-        // Fluents
-        robot-at(xpos, ypos) : {state-fluent, bool, default = false};
-        
-        // Actions
-        move-north : {action-fluent, bool, default = false};
-        move-south : {action-fluent, bool, default = false};
-        move-east  : {action-fluent, bool, default = false};
-        move-west  : {action-fluent, bool, default = false};
+        position_visited(aisle_position) : { state-fluent, bool, default = false };
+        navigate(aisle_position) : { action-fluent, bool, default = false };
+        grasp_fruit(location) : { action-fluent, bool, default = false };
+        load_to_bin(location) : { action-fluent, bool, default = false };
+        unload : { action-fluent, bool, default = false };
     };
-    
+     
+    // Conditional Probability Functions 
+ 
     cpfs {
-    
-        robot-at'(?x,?y) =
+        robot_at'(?a) = 
+            if (navigate(?a)) 
+                then true
+            else if (exists_{?a2 : aisle_position} [navigate(?a2) ^ (?a2 ~= ?a)])
+                then false
+            else robot_at(?a);
+
+        fruit_at'(?l) = 
+            if (grasp_fruit(?l) ^ 
+                exists_{?a : aisle_position} [robot_at(?a) ^ reachable_from(?l, ?a)] ^ 
+                fruit_at(?l)) then
+                if (Bernoulli(GRASP_SUCCESS_PROB))
+                    then false  // Successfully grasped
+                    else true   // Failed to grasp
+            else fruit_at(?l);
+
+        fruit_collected'(?l) = 
+            if (unload ^ fruit_in_bin(?l) ^ 
+                exists_{?a : aisle_position} [robot_at(?a) ^ unload_station(?a)])
+                then false  
+            else if (fruit_at(?l) ^ ~fruit_at'(?l))
+                then true   
+            else if (fruit_in_bin(?l))
+                then true   
+            else fruit_collected(?l);
         
-            if ( GOAL(?x,?y) ^ robot-at(?x,?y)  )
-            then 
-                KronDelta(true)
-            else if (( exists_{?x2 : xpos, ?y2 : ypos} [ GOAL(?x2,?y2) ^ robot-at(?x2,?y2)  ] )
-                     | ( move-north ^ exists_{?y2 : ypos} [ NORTH(?y,?y2) ^ robot-at(?x,?y) ] )
-                     | ( move-south ^ exists_{?y2 : ypos} [ SOUTH(?y,?y2) ^ robot-at(?x,?y) ] )
-                     | ( move-east ^ exists_{?x2 : xpos} [ EAST(?x,?x2) ^ robot-at(?x,?y) ] )
-                     | ( move-west ^ exists_{?x2 : xpos} [ WEST(?x,?x2) ^ robot-at(?x,?y) ] ))
-            then 
-                KronDelta(false) 
-            else if (( move-north ^ exists_{?y2 : ypos} [ NORTH(?y2,?y) ^ robot-at(?x,?y2) ] )
-                     | ( move-south ^ exists_{?y2 : ypos} [ SOUTH(?y2,?y) ^ robot-at(?x,?y2) ] )
-                     | ( move-east ^ exists_{?x2 : xpos} [ EAST(?x2,?x) ^ robot-at(?x2,?y) ] )
-                     | ( move-west ^ exists_{?x2 : xpos} [ WEST(?x2,?x) ^ robot-at(?x2,?y) ] ))
-            then 
-                Bernoulli( 1.0 - P(?x, ?y) ) 
-            else 
-                KronDelta( robot-at(?x,?y) );
-                
+       
+        fruit_in_bin'(?l) = 
+            if (unload ^ exists_{?a : aisle_position} [robot_at(?a) ^ unload_station(?a)])
+                then false 
+            else if (load_to_bin(?l) ^ 
+                     exists_{?a : aisle_position} [robot_at(?a) ^ reachable_from(?l, ?a)] ^ 
+                     fruit_collected(?l) ^ ~fruit_in_bin(?l))
+                then true   
+            else fruit_in_bin(?l);
+
+        // To track which positions have been completed 
+        position_visited'(?a) = 
+            if (robot_at(?a) ^ 
+                exists_{?l : location} [load_to_bin(?l) ^ reachable_from(?l, ?a)])
+                then true
+            else position_visited(?a);
+
+        fruits_unloaded'(?l) = 
+            if (unload ^ fruit_in_bin(?l) ^ 
+                exists_{?a : aisle_position} [robot_at(?a) ^ unload_station(?a)])
+                then true
+            else fruits_unloaded(?l);
     };
+  
+    reward = 
+        (sum_{?l : location} [fruit_collected'(?l) ^ ~fruit_collected(?l) ^ fruit_ripe(?l)]) * 30.0
+        + (sum_{?l : location} [fruit_in_bin'(?l) ^ ~fruit_in_bin(?l) ^ fruit_ripe(?l)]) * 10
+        + (sum_{?l : location} [fruit_in_bin'(?l)]) * 0.2
+        + (sum_{?a : aisle_position} [robot_at'(?a) ^ unload_station(?a) ^
+            (forall_{?l : location} [~fruit_at'(?l) | ~fruit_ripe(?l)]) ^
+            (forall_{?l : location} [(fruit_collected'(?l) ^ fruit_ripe(?l)) => fruits_unloaded'(?l)])]) * 200.0
+        + (sum_{?a : aisle_position} [navigate(?a) ^ unload_station(?a) ^
+            ((sum_{?l : location} [fruit_in_bin(?l) * fruit_weight(?l)]) >= CAPACITY_THRESHOLD)]) * 500.0
+       
+        - (sum_{?a1 : aisle_position, ?a2 : aisle_position} 
+           [robot_at(?a1) ^ navigate(?a2) ^ adjacent(?a1, ?a2)] * distance(?a1, ?a2)) * 0.3
+        
+        - (sum_{?l : location} grasp_fruit(?l)) * 0.05
+        - (sum_{?l : location} load_to_bin(?l)) * 0.05
+        - unload * 0.05
+        
+        - (sum_{?a : aisle_position} [robot_at(?a) ^ ~unload_station(?a) ^
+            ((sum_{?l : location} [fruit_in_bin(?l) * fruit_weight(?l)]) >= CAPACITY_THRESHOLD) ^
+            ~exists_{?a2 : aisle_position} [navigate(?a2) ^ unload_station(?a2)]]) * 100.0
+     
+        - (sum_{?a1 : aisle_position, ?a2 : aisle_position} 
+           [robot_at(?a1) ^ navigate(?a2) ^ adjacent(?a1, ?a2) ^ 
+            ~unload_station(?a1) ^ ~unload_station(?a2) ^
+            ((sum_{?l : location} [fruit_in_bin(?l) * fruit_weight(?l)]) < CAPACITY_THRESHOLD) ^
+            exists_{?l : location} [reachable_from(?l, ?a1) ^ fruit_ripe(?l) ^
+                                    ((fruit_at(?l) ^ ~fruit_collected(?l)) | 
+                                     (fruit_collected(?l) ^ ~fruit_in_bin(?l)))]]) * 12.0;
+
+  
+    // Action preconditions
+ 
+    action-preconditions {
+        
+        forall_{?a : aisle_position} [
+            navigate(?a) => exists_{?a_current : aisle_position} [
+                robot_at(?a_current) ^ adjacent(?a_current, ?a)
+            ]
+        ];
+        
+        // cannot navigate to non-unload positions when capacity threshold is reached
+    forall_{?a : aisle_position} [
+        (navigate(?a) ^ ~unload_station(?a)) => 
+        ((sum_{?l : location} [fruit_in_bin(?l) * fruit_weight(?l)]) < CAPACITY_THRESHOLD)
+    ];
+  
+        forall_{?a : aisle_position} [
+            navigate(?a) => ~robot_at(?a)
+        ];
+  
+        forall_{?a1 : aisle_position, ?a2 : aisle_position} [
+    (robot_at(?a1) ^ navigate(?a2) ^ adjacent(?a1, ?a2) ^ ~unload_station(?a1)) => 
+    (
+        (forall_{?l : location} [
+            (reachable_from(?l, ?a1) ^ fruit_ripe(?l)) => 
+            (fruit_in_bin(?l) | ~fruit_collected(?l))  // ← CHANGED
+        ])
+        |
+        ((sum_{?l : location} [fruit_in_bin(?l) * fruit_weight(?l)]) >= CAPACITY_THRESHOLD)
+    )
+];
+  
+        forall_{?a : aisle_position} [
+            (navigate(?a) ^ unload_station(?a)) => 
+            exists_{?l : location} [fruit_in_bin(?l)]
+        ];
     
-    // 0 reward for reaching goal, -1 in all other cases
-    reward = [sum_{?x : xpos, ?y : ypos} -(GOAL(?x,?y) ^ ~robot-at(?x,?y))]; 
-    
-//  state-action-constraints {
-//  
-//      // Robot at exactly one position
-//      [sum_{?x : xpos, ?y : ypos} robot-at(?x,?y)] <= 1;
-//      
-//      // EAST, WEST, NORTH, SOUTH defined properly (unique and symmetric)
-//      forall_{?x1 : xpos} [(sum_{?x2 : xpos} WEST(?x1,?x2)) <= 1];
-//      forall_{?x1 : xpos} [(sum_{?x2 : xpos} EAST(?x1,?x2)) <= 1];
-//      forall_{?y1 : ypos} [(sum_{?y2 : ypos} NORTH(?y1,?y2)) <= 1];
-//      forall_{?y1 : ypos} [(sum_{?y2 : ypos} SOUTH(?y1,?y2)) <= 1];
-//      forall_{?x1 : xpos, ?x2 : xpos} [ EAST(?x1,?x2) <=> WEST(?x2,?x1) ];
-//      forall_{?y1 : ypos, ?y2 : ypos} [ SOUTH(?y1,?y2) <=> NORTH(?y2,?y1) ];
-//
-//      // Definition verification
-//      [ sum_{?x : xpos} MIN-XPOS(?x) ] == 1;
-//      [ sum_{?x : xpos} MAX-XPOS(?x) ] == 1;
-//      [ sum_{?y : ypos} MIN-YPOS(?y) ] == 1;
-//      [ sum_{?y : ypos} MAX-YPOS(?y) ] == 1;
-//      [ sum_{?x : xpos, ?y : ypos} GOAL(?x,?y) ] == 1;
-//      
-//  };
-    
+        forall_{?a1 : aisle_position, ?a2 : aisle_position} [
+            (robot_at(?a1) ^ unload_station(?a1) ^ navigate(?a2) ^ adjacent(?a1, ?a2)) =>
+            ~exists_{?l : location} [fruit_in_bin(?l)]
+        ];
+        
+        forall_{?a : aisle_position} [
+            navigate(?a) => (~position_visited(?a) | unload_station(?a))
+        ];
+
+        forall_{?l : location} [
+            grasp_fruit(?l) => (
+                exists_{?a : aisle_position} [robot_at(?a) ^ reachable_from(?l, ?a)] ^
+                fruit_at(?l) ^ 
+                fruit_ripe(?l) ^
+                ~fruit_in_bin(?l) ^
+                // Check capacity for this fruit
+                ((sum_{?l2 : location} [fruit_in_bin(?l2) * fruit_weight(?l2)]) + 
+                 fruit_weight(?l) <= MAX_CAPACITY)
+            )
+        ];
+        
+        forall_{?l : location} [
+            load_to_bin(?l) => (
+                exists_{?a : aisle_position} [robot_at(?a) ^ reachable_from(?l, ?a)] ^
+                fruit_collected(?l) ^ 
+                ~fruit_at(?l) ^
+                ~fruit_in_bin(?l)
+            )
+        ];
+        
+forall_{?l : location} [
+    grasp_fruit(?l) => 
+    (
+        ~exists_{?l2 : location, ?a : aisle_position} [
+            (?l2 ~= ?l) ^ 
+            robot_at(?a) ^ 
+            reachable_from(?l, ?a) ^ 
+            reachable_from(?l2, ?a) ^
+            ~fruit_at(?l2) ^           
+            fruit_collected(?l2) ^     
+            ~fruit_in_bin(?l2)         
+        ]
+    )
+];
+        
+        forall_{?l : location} [
+            load_to_bin(?l) => 
+            ((sum_{?l2 : location} [fruit_in_bin(?l2) * fruit_weight(?l2)]) + 
+             fruit_weight(?l) <= MAX_CAPACITY)
+        ];
+
+        unload => (
+            exists_{?a : aisle_position} [robot_at(?a) ^ unload_station(?a)] ^
+            exists_{?l : location} [fruit_in_bin(?l)]
+        );
+
+        forall_{?a : aisle_position} [
+            (robot_at(?a) ^ unload_station(?a) ^ 
+             exists_{?l : location} [fruit_in_bin(?l)]) =>
+            (
+                unload ^ 
+                ~exists_{?a2 : aisle_position} [navigate(?a2)] ^
+                ~exists_{?l2 : location} [grasp_fruit(?l2)] ^
+                ~exists_{?l3 : location} [load_to_bin(?l3)]
+            )
+        ];
+
+        // action limits
+
+        (sum_{?a : aisle_position} navigate(?a)) <= 1;
+        (sum_{?l : location} grasp_fruit(?l)) <= 1;
+        (sum_{?l : location} load_to_bin(?l)) <= 1;
+    };
 }
