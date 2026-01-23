@@ -11,6 +11,22 @@ from prost_ros.srv import StartPlanning, SubmitObservation
 
 from evaluator import FruitHarvestingRewardEvaluator
 import numpy as np
+import rospkg
+import os
+
+def get_problem_data_paths(
+    package_name="rbkairos_etf_services",
+    domain_name="domain.rddl",
+    instance_name="instance.rddl",
+    ):
+
+    rp = rospkg.RosPack()
+    pkg_path = rp.get_path(package_name)  
+    problem_data = os.path.join(pkg_path, "problem_data")
+    return (
+            os.path.join(problem_data, domain_name),
+            os.path.join(problem_data, instance_name),
+        )
 
 class ServiceCaller:
     def __init__(self, robot_id, domain_file, instance_file):
@@ -53,8 +69,8 @@ class ServiceCaller:
         # Load the actions.json action to experiment data
         with open("actions.json", "r", encoding="utf-8") as f:
             self.ACTION_DATA = json.load(f)
+    
 
-        
     def run(self):
 
         while True:
@@ -91,12 +107,10 @@ class ServiceCaller:
 
 if __name__ == "__main__":
 
-    #TODO: Automate this
-    # domain_file = "/home/ruzamladji/catkin_ws/src/rbkairos_etf_services/problem_data/fruit_collection_domain.rddl"
-    # instance_file = "/home/ruzamladji/catkin_ws/src/rbkairos_etf_services/problem_data/fruit_collection_inst.rddl"
+    domain_file, instance_file = get_problem_data_paths()
 
-    domain_file = "/home/etf-robotics/catkin_ws/src/rbkairos_etf_services/problem_data/domain.rddl"
-    instance_file = "/home/etf-robotics/catkin_ws/src/rbkairos_etf_services/problem_data/instance.rddl"
+    # domain_file = "/problem_data/domain.rddl"
+    # instance_file = "/problem_data/instance.rddl"
     
     sc = ServiceCaller("Robotnik", domain_file, instance_file)
     sc.run()
