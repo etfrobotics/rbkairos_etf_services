@@ -272,58 +272,8 @@ class FruitHarvestingRewardEvaluator:
         
         return next_obs
 
-
 if __name__ == "__main__":
-
-    domain_file = "problem_data/domain.rddl"
-    instance_file = "problem_data/instance.rddl"
-
-    print("=" * 70)
-    print("Fruit Harvesting Reward Evaluator - Single Step Simulation")
-    print("=" * 70)
-   
-    # Initialize the evaluator
-    evaluator = FruitHarvestingRewardEvaluator(domain_file, instance_file)
     
-    initial_obs = evaluator.create_observation_template()
-    
-    # Set initial state from model
-    initial_obs['fruit_at'] = np.array(evaluator.env.model._state_fluents['fruit_at'])
-    initial_obs['fruit_collected'] = np.array(evaluator.env.model._state_fluents['fruit_collected'])
-    initial_obs['fruit_in_bin'] = np.array(evaluator.env.model._state_fluents['fruit_in_bin'])
-    initial_obs['fruits_unloaded'] = np.array(evaluator.env.model._state_fluents['fruits_unloaded'])
-    initial_obs['robot_at'] = np.array(evaluator.env.model._state_fluents['robot_at'])
-    initial_obs['position_visited'] = np.array(evaluator.env.model._state_fluents['position_visited'])
-
-    print(evaluator)
-
-    print(f"Robot at position: {np.where(initial_obs['robot_at'])[0]}")
-    print(f"Fruits at locations: {np.sum(initial_obs['fruit_at'])}/{evaluator.num_locations}")
-    print(f"Fruits collected: {np.sum(initial_obs['fruit_collected'])}")
-    print(f"Fruits in bin: {np.sum(initial_obs['fruit_in_bin'])}")
-    print(f"Current bin load: {evaluator.bin_load(initial_obs['fruit_in_bin']):.2f}")
-    
-    # Action sequence: navigate to adjacent position, grasp fruit, load to bin, unload (Here we assume that the response was true for 
-    # all actions, this is just to demonstrate this module. In the integration with the service caller, the action server returns the 
-    # response of each action, and we can use this to update the observation). 
-
-    action = evaluator.create_observation_template()
-    
-    current_pos = np.where(initial_obs['robot_at'])[0][0]
-    
-    adjacent_positions = np.where(evaluator.adjacent[current_pos])[0]
-
-    target_pos = adjacent_positions[0]
-    action['navigate'][target_pos] = True
-    action['grasp_fruit'][target_pos] = True
-    action['load_to_bin'][target_pos] = True
-    action['unload'] = True
-
-    
-    # Simulate next state
-    next_obs = evaluator.step(initial_obs, action)
-    
-    reward = evaluator.evaluate_reward(initial_obs, next_obs)
-
-    print(f"Reward: {reward}")
+    # ev = get_evaluator("domain.rddl", "instance.rddl")
+    print("evaluator.py")
     

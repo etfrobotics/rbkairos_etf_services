@@ -11,11 +11,13 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
+catkin_python_setup()
+
 add_service_files(
   FILES
     MoveArm.srv
-    Pick.srv
     MoveBase.srv
+    ActionServer.srv
 )
 
 generate_messages(
@@ -35,7 +37,8 @@ catkin_package(
 catkin_install_python(PROGRAMS
   scripts/move_moveit_fr3.py
   scripts/move_rbkairos.py
-  scripts/pick_fr3.py
+  scripts/service_caller.py
+  scripts/action_manager.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
