@@ -135,6 +135,7 @@ class ServiceCaller:
                                       "true" if val else "false"))
 
             #TODO: Check if these intial conditions are ok, aisle loctions and so on...
+            #TODO: Check if the obs_to_submit can have more than one observations...
 
             add_fluents("robot_at", self.obs['robot_at'], self.positions)
             add_fluents("fruit_at", self.obs['fruit_at'], self.locations)
@@ -143,7 +144,7 @@ class ServiceCaller:
             add_fluents("fruits_unloaded", self.obs['fruits_unloaded'], self.locations)
             add_fluents("position_visited", self.obs['position_visited'], self.positions)
 
-            print(obs_to_submit[0])
+            # print(obs_to_submit[0])
             
             action_to_take = self.submit_obs(obs_to_submit, self.reward)
 
@@ -215,11 +216,15 @@ class ServiceCaller:
 
             # print(observed_action)
     
-            #TODO: Debug the step function (maybe add NOOP?) Implement it here? The position_visited is not being set properly.          
+            #TODO: Debug the step function (maybe add NOOP?) Implement it here? The position_visited is not being set properly.
+            #TODO: Planner is locked in the NOOP state          
             next_obs = self.evaluator.step(self.obs, observed_action)
-            
+            next_obs["position_visited"][0] = True
+            next_obs["grasp_fruit"][0] = True
+            next_obs["fruit_at"][0] = True
+            next_obs["navigate"][0] = True
 
-            # print(next_obs)
+            print(next_obs)
        
             reward = self.evaluator.evaluate_reward(self.obs, next_obs)
 
@@ -230,7 +235,8 @@ class ServiceCaller:
                 reward = 0.0
                 rospy.loginfo("Sim finished")
                 break
-
+            
+            # TODO: Check if the update is being done properly
             # Update the current observation and the previous reward for the planner at the start of the next iteration
             self.obs = next_obs
             self.reward = reward
