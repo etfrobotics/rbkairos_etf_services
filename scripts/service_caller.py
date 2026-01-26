@@ -6,6 +6,7 @@ from prost_ros.srv import StartPlanning, SubmitObservation
 from prost_ros.msg import KeyValue
 from rbkairos_etf_services.srv import ActionServer
 
+import re
 
 # Usage: rosrun prost_ros prost_bridge.py _prost_path:=/home/ruzamladji/catkin_ws/src/prost_ros/prost/prost.py
 
@@ -86,59 +87,146 @@ class ServiceCaller:
         self.positions = get_sorted_objects('aisle_position')
         self.locations = get_sorted_objects('location')
         
-        # Reverse mappings for action interpretation
-        self.pos_to_idx = {name: i for i, name in enumerate(self.positions)}
-        self.loc_to_idx = {name: i for i, name in enumerate(self.locations)}
+        # # Reverse mappings for action interpretation
+        # self.pos_to_idx = {name: i for i, name in enumerate(self.positions)}
+        # self.loc_to_idx = {name: i for i, name in enumerate(self.locations)}
+        
+        self.idle_count = 0
+
+    def get_indices(out):
+        # out can be ['l2'] or 'l2'
+        s = out[0] if isinstance(out, list) else out
+
+        aisle_index = -1
+        location_index = -1
+
+        if s == "unload1":
+            aisle_index = 0
+        elif s == "unload2":
+            aisle_index = 1
+        else:
+            m_a = re.fullmatch(r"a(\d+)", s)
+            m_l = re.fullmatch(r"l(\d+)", s)
+
+            if m_a:
+                n = int(m_a.group(1))
+                aisle_index = n + 1   # a1 -> 2, a2 -> 3, ...
+            elif m_l:
+                n = int(m_l.group(1))
+                location_index = n - 1  # l1 -> 0, l2 -> 1, ...
+
+        return aisle_index, location_index
+
+    #TODO: Check the intiial fruit init, fruit_at should be true.
 
     def run(self):
 
         while True:
-
+            
             rospy.loginfo("Sending Observations and rewards to the planner . . .")
 
             obs_to_submit = []
             
-            # Helper to add true fluents to observation
+            # Helper to add true fluents to observation in the format of the PROST KeyValue service
             def add_fluents(name, values, obj_list):
-                 for i, val in enumerate(values):
-                     if val:
-                         obs_to_submit.append(KeyValue(f"{name}({obj_list[i]})", "true"))
+                for i, val in enumerate(values): 
+
+                    obs_to_submit.append(KeyValue(f"{name}({obj_list[i]})",
+                                      "true" if val else "false"))
+
+            #TODO: Check if these intial conditions are ok, aisle loctions and so on...
 
             add_fluents("robot_at", self.obs['robot_at'], self.positions)
             add_fluents("fruit_at", self.obs['fruit_at'], self.locations)
             add_fluents("fruit_collected", self.obs['fruit_collected'], self.locations)
             add_fluents("fruit_in_bin", self.obs['fruit_in_bin'], self.locations)
             add_fluents("fruits_unloaded", self.obs['fruits_unloaded'], self.locations)
-            add_fluents("position_visited", self.obs['position_visited'], self.positions) 
+            add_fluents("position_visited", self.obs['position_visited'], self.positions)
+
+            print(obs_to_submit[0])
             
             action_to_take = self.submit_obs(obs_to_submit, self.reward)
 
-            print(action_to_take)
-            #TODO: CHECK THE OUTPUT OF THE PLANNER
+            action_name = action_to_take.action_name # String, in the same format in the action manager so "navigate, grasp_fruit"
+            action_data = action_to_take.action_params
+
+            # Action index is equal to either the aisle or the location index. It notifies which of the OPTIMIZATION variables should
+            # be modified.
+            if action_name == "NOOP":
+                action_index = -1
+                location_index = -1
+            else:
+                aisle_index, location_index = self.get_indices(action_data)
+
+
+            print(action_name)
+            print(action_data)
+
 
             rospy.loginfo("Performing action . . .")
+
+            action_index = -1
+
+            if action_name == "navigate":
+                real_action = self.ACTION_DATA[action_name][aisle_index]
+                action_index = aisle_index
+
+            elif action_name == "grasp_fruit":
+                real_action = self.ACTION_DATA[action_name][location_index]
+                action_index = location_index
+
+            elif action_name == "load_to_bin":
+                real_action = self.ACTION_DATA[action_name][0]
+                action_index = location_index
+
+            elif action_name == "unload":
+                if aisle_index == 0:
+                    real_action = self.ACTION_DATA[action_name][0]
+                    action_index = -1
+                elif aisle_index == 1:
+                    real_action = self.ACTION_DATA[action_name][1]
+                    action_index = -1
+
+            elif action_name == "NOOP":
+                real_action = np.array([0,0,0,0,0,0])
+                action_index = -1
+
+            else:
+                action_index = -1
+                print("Unknown action")
             
+
             # Should receive (success, message) or similar, but perform_action returns ActionServerResponse (bool success, string message)
-            response = self.perform_action(action_name, action_data, 0.0)
-            success = response.success
-            rospy.loginfo(f"Action finished with success: {success} | {response.message}")
+
+            # response = self.perform_action(action_name, real_action) #TODO: Uncomment this
+            # success = response.success
+            success = True
+            # rospy.loginfo(f"Action finished with success: {success} | {response.message}")
 
             observed_action = self.evaluator.create_observation_template()
-            
-            # Update the observed action for the evaluator
-            if action_name == "unload":
-                observed_action[action_name] = success
-            else:
-                 for idx in updated_indices:
-                     # Update the boolean array at the specific index
-                     observed_action[action_name][idx] = success
 
-            next_obs = self.evaluator.step(self.obs, observed_action)
+            if action_name != "NOOP":
+                if action_name == "unload":
+                    observed_action[action_name] = success
+                else:
+                    observed_action[action_name][action_index] = success
+            else:
+                observed_action["position_visited"][0] = True
+
+            # print(observed_action)
     
+            #TODO: Debug the step function (maybe add NOOP?) Implement it here? The position_visited is not being set properly.          
+            next_obs = self.evaluator.step(self.obs, observed_action)
+            
+
+            # print(next_obs)
+       
             reward = self.evaluator.evaluate_reward(self.obs, next_obs)
 
+            print(reward)
 
-            if self.evaluator.env.model._state_fluents['goal_reached']:
+            #TODO: Find a more appropriate termination flag
+            if self.idle_count > 200:
                 reward = 0.0
                 rospy.loginfo("Sim finished")
                 break
@@ -147,6 +235,7 @@ class ServiceCaller:
             self.obs = next_obs
             self.reward = reward
 
+            self.idle_count += 1
 
 
 if __name__ == "__main__":

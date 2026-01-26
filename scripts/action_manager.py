@@ -274,6 +274,9 @@ class ActionManagerNode:
         elif action_id == "unload":
             ok, msg = self.action_unload(action_id, timeout=timeout_s)
 
+        elif action_id == "NOOP":
+            ok, msg = True, "NOOP: success."
+
         else:
             ok = False
             msg = f"Unknown action_id '{action_id}'. Supported: navigate, grasp_fruit, load_to_bin, navigate_to_unloading_station, unload"

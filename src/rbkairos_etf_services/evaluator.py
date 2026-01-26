@@ -215,6 +215,7 @@ class FruitHarvestingRewardEvaluator:
 
         return float(reward)
     
+    #TODO: Debug this and make it so that it doesnt do the adjecency checks because the planner takes it into account already.
     def step(self, obs: Dict[str, Any], action: Dict[str, Any]) -> Dict[str, Any]:
         """
         Simulate a simple deterministic step (for demonstration purposes).
@@ -256,11 +257,12 @@ class FruitHarvestingRewardEvaluator:
             target_pos = np.where(action['navigate'])[0][0]
             current_pos = np.where(obs['robot_at'])[0][0]
             
-            # Check if adjacent
-            if self.adjacent[current_pos, target_pos]:
-                next_obs['robot_at'] = np.zeros(self.num_positions, dtype=bool)
-                next_obs['robot_at'][target_pos] = True
-                next_obs['position_visited'][target_pos] = True
+            # # Check if adjacent
+            # if self.adjacent[current_pos, target_pos]:
+            print("promena")
+            next_obs['robot_at'] = np.zeros(self.num_positions, dtype=bool)
+            next_obs['robot_at'][target_pos] = True
+            next_obs['position_visited'][target_pos] = True
         
         # Apply unload action
         if action['unload']:
