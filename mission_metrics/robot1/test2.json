@@ -1,0 +1,576 @@
+{
+  "robot": "robot1",
+  "run_name": "test2",
+  "total_makespan_sec": 9698.26,
+  "total_distance_traveled_m": 137.879,
+  "unload_station_trips": 2,
+  "fruits": [
+    {
+      "fruit": "orange1.1.L.B",
+      "grasp_time_sec": 84.237,
+      "moveit_planning_time_sec": 0.98,
+      "grasp_cycle_time": 54.687,
+      "success": true
+    },
+    {
+      "fruit": "orange1.1.L.T",
+      "grasp_time_sec": 70.148,
+      "moveit_planning_time_sec": 4.976,
+      "grasp_cycle_time": 39.387,
+      "success": false
+    },
+    {
+      "fruit": "orange1.1.L.T",
+      "grasp_time_sec": 76.657,
+      "moveit_planning_time_sec": 1.583,
+      "grasp_cycle_time": 47.183,
+      "success": false
+    },
+    {
+      "fruit": "orange1.1.L.T",
+      "grasp_time_sec": 78.462,
+      "moveit_planning_time_sec": 0.855,
+      "grasp_cycle_time": 50.524,
+      "success": false
+    },
+    {
+      "fruit": "orange1.1.L.T",
+      "grasp_time_sec": 84.426,
+      "moveit_planning_time_sec": 1.434,
+      "grasp_cycle_time": 56.79,
+      "success": true
+    },
+    {
+      "fruit": "orange1.2.L.B",
+      "grasp_time_sec": 109.668,
+      "moveit_planning_time_sec": 5.409,
+      "grasp_cycle_time": 77.733,
+      "success": true
+    },
+    {
+      "fruit": "orange1.3.L.T",
+      "grasp_time_sec": 91.818,
+      "moveit_planning_time_sec": 1.154,
+      "grasp_cycle_time": 62.85,
+      "success": true
+    },
+    {
+      "fruit": "orange1.3.L.B",
+      "grasp_time_sec": 98.94,
+      "moveit_planning_time_sec": 0.321,
+      "grasp_cycle_time": 71.271,
+      "success": false
+    },
+    {
+      "fruit": "orange1.3.L.B",
+      "grasp_time_sec": 109.357,
+      "moveit_planning_time_sec": 9.55,
+      "grasp_cycle_time": 70.778,
+      "success": true
+    },
+    {
+      "fruit": "orange1.4.L.T",
+      "grasp_time_sec": 79.884,
+      "moveit_planning_time_sec": 1.373,
+      "grasp_cycle_time": 52.099,
+      "success": true
+    },
+    {
+      "fruit": "orange1.4.L.B",
+      "grasp_time_sec": 118.565,
+      "moveit_planning_time_sec": 9.993,
+      "grasp_cycle_time": 80.752,
+      "success": true
+    },
+    {
+      "fruit": "orange1.5.L.B",
+      "grasp_time_sec": 119.574,
+      "moveit_planning_time_sec": 22.55,
+      "grasp_cycle_time": 69.776,
+      "success": true
+    },
+    {
+      "fruit": "orange1.5.L.T",
+      "grasp_time_sec": 118.474,
+      "moveit_planning_time_sec": 0.369,
+      "grasp_cycle_time": 88.577,
+      "success": true
+    },
+    {
+      "fruit": "orange1.6.L.T",
+      "grasp_time_sec": 121.692,
+      "moveit_planning_time_sec": 2.645,
+      "grasp_cycle_time": 92.346,
+      "success": true
+    },
+    {
+      "fruit": "orange1.6.L.B",
+      "grasp_time_sec": 95.029,
+      "moveit_planning_time_sec": 1.352,
+      "grasp_cycle_time": 65.292,
+      "success": false
+    },
+    {
+      "fruit": "orange1.6.L.B",
+      "grasp_time_sec": 132.915,
+      "moveit_planning_time_sec": 25.499,
+      "grasp_cycle_time": 82.167,
+      "success": true
+    },
+    {
+      "fruit": "orange1.7.L.T",
+      "grasp_time_sec": 83.125,
+      "moveit_planning_time_sec": 4.978,
+      "grasp_cycle_time": 53.435,
+      "success": true
+    },
+    {
+      "fruit": "orange1.8.L.T",
+      "grasp_time_sec": 109.797,
+      "moveit_planning_time_sec": 4.456,
+      "grasp_cycle_time": 78.586,
+      "success": true
+    },
+    {
+      "fruit": "orange1.8.L.B",
+      "grasp_time_sec": 102.456,
+      "moveit_planning_time_sec": 11.331,
+      "grasp_cycle_time": 64.057,
+      "success": true
+    },
+    {
+      "fruit": "orange2.8.L.B",
+      "grasp_time_sec": 93.42,
+      "moveit_planning_time_sec": 7.97,
+      "grasp_cycle_time": 56.937,
+      "success": true
+    },
+    {
+      "fruit": "orange1.8.R.B",
+      "grasp_time_sec": 98.795,
+      "moveit_planning_time_sec": 3.022,
+      "grasp_cycle_time": 62.43,
+      "success": true
+    },
+    {
+      "fruit": "orange1.8.R.T",
+      "grasp_time_sec": 86.241,
+      "moveit_planning_time_sec": 0.847,
+      "grasp_cycle_time": 59.192,
+      "success": true
+    },
+    {
+      "fruit": "orange2.8.L.T",
+      "grasp_time_sec": 121.79,
+      "moveit_planning_time_sec": 0.539,
+      "grasp_cycle_time": 92.63,
+      "success": true
+    },
+    {
+      "fruit": "orange1.7.R.T",
+      "grasp_time_sec": 102.036,
+      "moveit_planning_time_sec": 0.285,
+      "grasp_cycle_time": 73.445,
+      "success": true
+    },
+    {
+      "fruit": "orange2.7.L.B",
+      "grasp_time_sec": 113.408,
+      "moveit_planning_time_sec": 2.765,
+      "grasp_cycle_time": 78.668,
+      "success": true
+    },
+    {
+      "fruit": "orange1.7.R.B",
+      "grasp_time_sec": 124.151,
+      "moveit_planning_time_sec": 3.696,
+      "grasp_cycle_time": 89.146,
+      "success": true
+    },
+    {
+      "fruit": "orange1.6.R.B",
+      "grasp_time_sec": 87.983,
+      "moveit_planning_time_sec": 0.798,
+      "grasp_cycle_time": 58.742,
+      "success": false
+    },
+    {
+      "fruit": "orange1.6.R.B",
+      "grasp_time_sec": 85.341,
+      "moveit_planning_time_sec": 1.972,
+      "grasp_cycle_time": 56.611,
+      "success": true
+    },
+    {
+      "fruit": "orange2.6.L.T",
+      "grasp_time_sec": 92.277,
+      "moveit_planning_time_sec": 0.6,
+      "grasp_cycle_time": 59.064,
+      "success": true
+    },
+    {
+      "fruit": "orange1.6.R.T",
+      "grasp_time_sec": 88.499,
+      "moveit_planning_time_sec": 4.271,
+      "grasp_cycle_time": 53.751,
+      "success": true
+    },
+    {
+      "fruit": "orange2.6.L.B",
+      "grasp_time_sec": 133.265,
+      "moveit_planning_time_sec": 0.434,
+      "grasp_cycle_time": 101.292,
+      "success": true
+    },
+    {
+      "fruit": "orange1.5.R.T",
+      "grasp_time_sec": 113.738,
+      "moveit_planning_time_sec": 7.918,
+      "grasp_cycle_time": 76.552,
+      "success": true
+    },
+    {
+      "fruit": "orange1.5.R.B",
+      "grasp_time_sec": 102.397,
+      "moveit_planning_time_sec": 1.276,
+      "grasp_cycle_time": 75.176,
+      "success": true
+    },
+    {
+      "fruit": "orange2.5.L.T",
+      "grasp_time_sec": 91.783,
+      "moveit_planning_time_sec": 2.049,
+      "grasp_cycle_time": 59.96,
+      "success": false
+    },
+    {
+      "fruit": "orange2.5.L.T",
+      "grasp_time_sec": 95.94,
+      "moveit_planning_time_sec": 7.674,
+      "grasp_cycle_time": 61.185,
+      "success": true
+    },
+    {
+      "fruit": "orange2.5.L.B",
+      "grasp_time_sec": 101.913,
+      "moveit_planning_time_sec": 6.197,
+      "grasp_cycle_time": 71.126,
+      "success": false
+    },
+    {
+      "fruit": "orange2.5.L.B",
+      "grasp_time_sec": 95.502,
+      "moveit_planning_time_sec": 2.019,
+      "grasp_cycle_time": 67.994,
+      "success": true
+    },
+    {
+      "fruit": "orange2.4.L.T",
+      "grasp_time_sec": 92.116,
+      "moveit_planning_time_sec": 9.207,
+      "grasp_cycle_time": 54.585,
+      "success": true
+    },
+    {
+      "fruit": "orange2.4.L.B",
+      "grasp_time_sec": 76.753,
+      "moveit_planning_time_sec": 1.54,
+      "grasp_cycle_time": 49.877,
+      "success": false
+    },
+    {
+      "fruit": "orange1.4.R.T",
+      "grasp_time_sec": 92.182,
+      "moveit_planning_time_sec": 2.102,
+      "grasp_cycle_time": 55.014,
+      "success": false
+    },
+    {
+      "fruit": "orange1.4.R.T",
+      "grasp_time_sec": 84.92,
+      "moveit_planning_time_sec": 5.359,
+      "grasp_cycle_time": 52.651,
+      "success": true
+    },
+    {
+      "fruit": "orange2.4.L.B",
+      "grasp_time_sec": 98.526,
+      "moveit_planning_time_sec": 0.528,
+      "grasp_cycle_time": 67.791,
+      "success": false
+    },
+    {
+      "fruit": "orange2.4.L.B",
+      "grasp_time_sec": 89.756,
+      "moveit_planning_time_sec": 0.361,
+      "grasp_cycle_time": 63.758,
+      "success": true
+    },
+    {
+      "fruit": "orange2.3.L.B",
+      "grasp_time_sec": 150.126,
+      "moveit_planning_time_sec": 5.467,
+      "grasp_cycle_time": 115.909,
+      "success": true
+    },
+    {
+      "fruit": "orange2.3.L.T",
+      "grasp_time_sec": 88.29,
+      "moveit_planning_time_sec": 10.455,
+      "grasp_cycle_time": 53.088,
+      "success": false
+    },
+    {
+      "fruit": "orange2.3.L.T",
+      "grasp_time_sec": 106.276,
+      "moveit_planning_time_sec": 8.736,
+      "grasp_cycle_time": 73.493,
+      "success": true
+    },
+    {
+      "fruit": "orange1.3.R.B",
+      "grasp_time_sec": 83.9,
+      "moveit_planning_time_sec": 5.512,
+      "grasp_cycle_time": 48.514,
+      "success": true
+    },
+    {
+      "fruit": "orange1.3.R.T",
+      "grasp_time_sec": 106.559,
+      "moveit_planning_time_sec": 4.559,
+      "grasp_cycle_time": 77.58,
+      "success": true
+    },
+    {
+      "fruit": "orange1.2.R.B",
+      "grasp_time_sec": 96.357,
+      "moveit_planning_time_sec": 3.132,
+      "grasp_cycle_time": 64.886,
+      "success": true
+    },
+    {
+      "fruit": "orange2.2.L.B",
+      "grasp_time_sec": 163.677,
+      "moveit_planning_time_sec": 40.304,
+      "grasp_cycle_time": 94.399,
+      "success": false
+    },
+    {
+      "fruit": "orange2.1.R.B",
+      "grasp_time_sec": 100.132,
+      "moveit_planning_time_sec": 0.24,
+      "grasp_cycle_time": 71.097,
+      "success": true
+    },
+    {
+      "fruit": "orange2.1.R.T",
+      "grasp_time_sec": 90.283,
+      "moveit_planning_time_sec": 9.954,
+      "grasp_cycle_time": 55.339,
+      "success": false
+    },
+    {
+      "fruit": "orange2.1.R.T",
+      "grasp_time_sec": 98.555,
+      "moveit_planning_time_sec": 2.817,
+      "grasp_cycle_time": 68.625,
+      "success": true
+    },
+    {
+      "fruit": "orange3.1.L.T",
+      "grasp_time_sec": 87.425,
+      "moveit_planning_time_sec": 0.41,
+      "grasp_cycle_time": 55.366,
+      "success": true
+    },
+    {
+      "fruit": "orange3.1.L.B",
+      "grasp_time_sec": 101.804,
+      "moveit_planning_time_sec": 2.563,
+      "grasp_cycle_time": 72.822,
+      "success": true
+    },
+    {
+      "fruit": "orange2.2.R.T",
+      "grasp_time_sec": 110.652,
+      "moveit_planning_time_sec": 13.186,
+      "grasp_cycle_time": 68.359,
+      "success": true
+    },
+    {
+      "fruit": "orange2.2.R.B",
+      "grasp_time_sec": 84.397,
+      "moveit_planning_time_sec": 1.664,
+      "grasp_cycle_time": 57.127,
+      "success": false
+    },
+    {
+      "fruit": "orange3.2.L.T",
+      "grasp_time_sec": 79.14,
+      "moveit_planning_time_sec": 0.726,
+      "grasp_cycle_time": 46.055,
+      "success": false
+    },
+    {
+      "fruit": "orange2.2.R.B",
+      "grasp_time_sec": 100.108,
+      "moveit_planning_time_sec": 2.981,
+      "grasp_cycle_time": 67.08,
+      "success": true
+    },
+    {
+      "fruit": "orange3.2.L.B",
+      "grasp_time_sec": 111.983,
+      "moveit_planning_time_sec": 2.197,
+      "grasp_cycle_time": 79.152,
+      "success": false
+    },
+    {
+      "fruit": "orange3.2.L.T",
+      "grasp_time_sec": 79.223,
+      "moveit_planning_time_sec": 1.46,
+      "grasp_cycle_time": 50.686,
+      "success": true
+    },
+    {
+      "fruit": "orange3.2.L.B",
+      "grasp_time_sec": 81.065,
+      "moveit_planning_time_sec": 0.995,
+      "grasp_cycle_time": 53.537,
+      "success": false
+    },
+    {
+      "fruit": "orange3.2.L.B",
+      "grasp_time_sec": 92.645,
+      "moveit_planning_time_sec": 3.153,
+      "grasp_cycle_time": 64.39,
+      "success": true
+    },
+    {
+      "fruit": "orange2.3.R.T",
+      "grasp_time_sec": 146.73,
+      "moveit_planning_time_sec": 44.537,
+      "grasp_cycle_time": 72.276,
+      "success": false
+    },
+    {
+      "fruit": "orange2.3.R.B",
+      "grasp_time_sec": 126.653,
+      "moveit_planning_time_sec": 0.506,
+      "grasp_cycle_time": 99.832,
+      "success": true
+    },
+    {
+      "fruit": "orange3.3.L.T",
+      "grasp_time_sec": 88.571,
+      "moveit_planning_time_sec": 1.333,
+      "grasp_cycle_time": 55.711,
+      "success": true
+    },
+    {
+      "fruit": "orange3.3.L.B",
+      "grasp_time_sec": 102.417,
+      "moveit_planning_time_sec": 1.705,
+      "grasp_cycle_time": 72.647,
+      "success": true
+    },
+    {
+      "fruit": "orange2.3.R.T",
+      "grasp_time_sec": 98.15,
+      "moveit_planning_time_sec": 4.873,
+      "grasp_cycle_time": 62.57,
+      "success": true
+    },
+    {
+      "fruit": "orange3.4.L.T",
+      "grasp_time_sec": 84.714,
+      "moveit_planning_time_sec": 3.725,
+      "grasp_cycle_time": 51.112,
+      "success": true
+    },
+    {
+      "fruit": "orange2.4.R.B",
+      "grasp_time_sec": 106.182,
+      "moveit_planning_time_sec": 0.944,
+      "grasp_cycle_time": 73.323,
+      "success": true
+    },
+    {
+      "fruit": "orange2.4.R.T",
+      "grasp_time_sec": 101.708,
+      "moveit_planning_time_sec": 6.713,
+      "grasp_cycle_time": 67.284,
+      "success": false
+    },
+    {
+      "fruit": "orange2.4.R.T",
+      "grasp_time_sec": 112.968,
+      "moveit_planning_time_sec": 31.279,
+      "grasp_cycle_time": 55.435,
+      "success": true
+    },
+    {
+      "fruit": "orange1.1.R.T",
+      "grasp_time_sec": 119.929,
+      "moveit_planning_time_sec": 2.501,
+      "grasp_cycle_time": 87.236,
+      "success": false
+    },
+    {
+      "fruit": "orange1.1.R.T",
+      "grasp_time_sec": 96.255,
+      "moveit_planning_time_sec": 4.213,
+      "grasp_cycle_time": 66.66,
+      "success": true
+    },
+    {
+      "fruit": "orange1.1.R.B",
+      "grasp_time_sec": 93.505,
+      "moveit_planning_time_sec": 5.084,
+      "grasp_cycle_time": 62.218,
+      "success": true
+    },
+    {
+      "fruit": "orange2.1.L.B",
+      "grasp_time_sec": 91.975,
+      "moveit_planning_time_sec": 0.44,
+      "grasp_cycle_time": 60.328,
+      "success": false
+    },
+    {
+      "fruit": "orange2.1.L.B",
+      "grasp_time_sec": 118.434,
+      "moveit_planning_time_sec": 1.311,
+      "grasp_cycle_time": 90.412,
+      "success": true
+    },
+    {
+      "fruit": "orange2.2.L.T",
+      "grasp_time_sec": 109.992,
+      "moveit_planning_time_sec": 9.24,
+      "grasp_cycle_time": 72.042,
+      "success": true
+    },
+    {
+      "fruit": "orange2.2.L.B",
+      "grasp_time_sec": 100.906,
+      "moveit_planning_time_sec": 0.141,
+      "grasp_cycle_time": 74.531,
+      "success": true
+    },
+    {
+      "fruit": "orange1.2.R.T",
+      "grasp_time_sec": 74.461,
+      "moveit_planning_time_sec": 1.072,
+      "grasp_cycle_time": 42.392,
+      "success": false
+    },
+    {
+      "fruit": "orange1.2.R.T",
+      "grasp_time_sec": 89.471,
+      "moveit_planning_time_sec": 1.778,
+      "grasp_cycle_time": 60.758,
+      "success": true
+    }
+  ]
+}

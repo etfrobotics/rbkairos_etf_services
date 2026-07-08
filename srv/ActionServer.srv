@@ -4,3 +4,5 @@ float64 timeout
 ---
 bool success
 string message
+float64 moveit_planning_time_sec
+float64 post_moveit_planning_grasp_time_sec

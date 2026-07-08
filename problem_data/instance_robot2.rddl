@@ -1,81 +1,440 @@
-////////////////////////////////////////////////////////////////////
-// Single-robot instance — robot2, aisle 2 only
-// SIM-integration branch: per-robot PROST instance, max-nondef-actions=1
-// Reduced capacity (MAX_CAPACITY=3.5, CAPACITY_THRESHOLD=3.0) to
-// force the planner into multi-trip-to-unload behaviour.
-////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+// Robot 2 Instance — Waypoints a21-a40, 
+// Territory: Aisle 3 partial (a21-a24) + Aisle 4 (a25-a32) + Aisle 5 (a33-a40)
+// Fruits: l65-l128  (64 fruits)
+//////////////////////////////////////////////////////////////////////
 
 non-fluents fruit_robot2_nf {
     domain = fruit_collection_multi_aisle;
 
     objects {
-        location      : {l5, l6, l7, l8};
-        aisle_position: {a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, unload};
-        robot         : {robot2};
+        location : {l65, l66, l67, l68, l69, l70, l71, l72, l73, l74, l75, l76, l77, l78, l79, l80, l81, l82, l83, l84, l85, l86, l87, l88, l89, l90, l91, l92, l93, l94, l95, l96, l97, l98, l99, l100, l101, l102, l103, l104, l105, l106, l107, l108, l109, l110, l111, l112, l113, l114, l115, l116, l117, l118, l119, l120, l121, l122, l123, l124, l125, l126, l127, l128};
+        aisle_position : {a21, a22, a23, a24, a25, a26, a27, a28, a29, a30, a31, a32, a33, a34, a35, a36, a37, a38, a39, a40, unload1, unload2};
+        robot : {robot2};
     };
 
     non-fluents {
 
-        // === UNLOAD STATIONS ===
-        unload_station(unload);
+        // unload stations
+        unload_station(unload1);
+        unload_station(unload2);
 
-        // === ADJACENCY (aisle 2 only — robot2 cannot reach aisle 1) ===
-        adjacent(a1, a7);    adjacent(a7, a1);
-        adjacent(a7, a8);    adjacent(a8, a7);
-        adjacent(a8, a9);    adjacent(a9, a8);
-        adjacent(a9, a10);   adjacent(a10, a9);
-        adjacent(a10, a11);  adjacent(a11, a10);
+         // Adjacency
+        // Aisle 3 partial (Forward: a21->a24)
+        adjacent(a21, a22);
+        adjacent(a22, a21);
+        adjacent(a22, a23);
+        adjacent(a23, a22);
+        adjacent(a23, a24);
+        adjacent(a24, a23);
 
-        // Connection to unload station (via a1)
-        adjacent(a1, unload); adjacent(unload, a1);
+        // Aisle 4 (Background: a32->a25)
+        adjacent(a32, a31);
+        adjacent(a31, a32);
+        adjacent(a31, a30);
+        adjacent(a30, a31);
+        adjacent(a30, a29);
+        adjacent(a29, a30);
+        adjacent(a29, a28);
+        adjacent(a28, a29);
+        adjacent(a28, a27);
+        adjacent(a27, a28);
+        adjacent(a27, a26);
+        adjacent(a26, a27);
+        adjacent(a26, a25);
+        adjacent(a25, a26);
 
-        // === REACHABILITY (aisle 2 fruits) ===
-        reachable_from(l5, a8);
-        reachable_from(l6, a9);
-        reachable_from(l7, a10);
-        reachable_from(l8, a11);
+        // Aisle 5 (Forward: a33->a40)
+        adjacent(a33, a34);
+        adjacent(a34, a33);
+        adjacent(a34, a35);
+        adjacent(a35, a34);
+        adjacent(a35, a36);
+        adjacent(a36, a35);
+        adjacent(a36, a37);
+        adjacent(a37, a36);
+        adjacent(a37, a38);
+        adjacent(a38, a37);
+        adjacent(a38, a39);
+        adjacent(a39, a38);
+        adjacent(a39, a40);
+        adjacent(a40, a39);
 
-        // === DISTANCES (aisle 2) ===
-        distance(a1, a7)     = 3.000; distance(a7, a1)     = 3.000;
-        distance(a7, a8)     = 1.000; distance(a8, a7)     = 1.000;
-        distance(a8, a9)     = 1.000; distance(a9, a8)     = 1.000;
-        distance(a9, a10)    = 1.000; distance(a10, a9)    = 1.000;
-        distance(a10, a11)   = 1.000; distance(a11, a10)   = 1.000;
-        distance(a1, unload) = 3.000; distance(unload, a1) = 3.000;
+        // Between-aisle transitions (zigzag)
+        adjacent(a24, a32);
+        adjacent(a32, a24);
+        adjacent(a25, a33);
+        adjacent(a33, a25);
 
-        // === ROBOT PARAMETERS ===
-        GRASP_SUCCESS_PROB = 0.65;
-        MAX_CAPACITY       = 3.5;
-        CAPACITY_THRESHOLD = 3.0;
+        // Connections to unload stations
+        adjacent(a21, unload1);
+        adjacent(unload1, a21);
+        adjacent(a24, unload2);
+        adjacent(unload2, a24);
+        adjacent(a25, unload1);
+        adjacent(unload1, a25);
+        adjacent(a33, unload1);
+        adjacent(unload1, a33);
+        adjacent(a32, unload2);
+        adjacent(unload2, a32);
+        adjacent(a40, unload2);
+        adjacent(unload2, a40);
 
-        // === FRUIT WEIGHTS (aisle 2) ===
-        fruit_weight(l5) = 1.3;
-        fruit_weight(l6) = 0.9;
-        fruit_weight(l7) = 0.8;
-        fruit_weight(l8) = 0.9;
+       // Reachability
+        reachable_from(l65, a21);  
+        reachable_from(l66, a21);  
+        reachable_from(l67, a21);  
+        reachable_from(l68, a21);  
+        reachable_from(l69, a22);  
+        reachable_from(l70, a22);  
+        reachable_from(l71, a22);  
+        reachable_from(l72, a22);  
+        reachable_from(l73, a23);  
+        reachable_from(l74, a23);  
+        reachable_from(l75, a23);  
+        reachable_from(l76, a23);  
+        reachable_from(l77, a24);  
+        reachable_from(l78, a24);  
+        reachable_from(l79, a24);  
+        reachable_from(l80, a24);  
+        
+        reachable_from(l81, a25);  
+        reachable_from(l82, a25);  
+        reachable_from(l83, a25); 
+        reachable_from(l84, a25);  
+     
+        reachable_from(l85, a26);  
+        reachable_from(l86, a26);  
+        reachable_from(l87, a26);  
+        reachable_from(l88, a26);  
+     
+        reachable_from(l89, a27);  
+        reachable_from(l90, a27);  
+        reachable_from(l91, a27);  
+        reachable_from(l92, a27);  
+       
+        reachable_from(l93, a28);  
+        reachable_from(l94, a28);  
+        reachable_from(l95, a28);  
+        reachable_from(l96, a28);  
+        
+        reachable_from(l97, a29);  
+        reachable_from(l98, a29);  
+        reachable_from(l99, a29);  
+        reachable_from(l100, a29);  
+        reachable_from(l101, a30);  
+        reachable_from(l102, a30); 
+        reachable_from(l103, a30);  
+        reachable_from(l104, a30);  
+      
+        reachable_from(l105, a31);  
+        reachable_from(l106, a31);  
+        reachable_from(l107, a31);  
+        reachable_from(l108, a31);  
+     
+        reachable_from(l109, a32);  
+        reachable_from(l110, a32);  
+        reachable_from(l111, a32);  
+        reachable_from(l112, a32);  
 
-        // === FRUIT RIPENESS ===
-        fruit_ripe(l5) = true;
-        fruit_ripe(l6) = true;
-        fruit_ripe(l7) = true;
-        fruit_ripe(l8) = true;
+        
+        reachable_from(l113, a33);   
+        reachable_from(l114, a33);  
+        reachable_from(l115, a34);   
+        reachable_from(l116, a34);  
+        reachable_from(l117, a35);   
+        reachable_from(l118, a35);  
+        reachable_from(l119, a36);   
+        reachable_from(l120, a36);  
+        reachable_from(l121, a37);   
+        reachable_from(l122, a37);  
+       
+        reachable_from(l123, a38);   
+        reachable_from(l124, a38);  
+       
+        reachable_from(l125, a39);   
+        reachable_from(l126, a39);  
+        
+        reachable_from(l127, a40); 
+        reachable_from(l128, a40);  
+
+        // distances
+        // Aisle 3 partial 
+        distance(a21, a22) = 3.4406;
+        distance(a22, a21) = 3.4406;
+        distance(a22, a23) = 3.4406;
+        distance(a23, a22) = 3.4406;
+        distance(a23, a24) = 3.4406;
+        distance(a24, a23) = 3.4406;
+       
+       //Aisle 4
+        distance(a32, a31) = 3.4406;
+        distance(a31, a32) = 3.4406;
+        distance(a31, a30) = 3.4406;
+        distance(a30, a31) = 3.4406;
+        distance(a30, a29) = 3.4406;
+        distance(a29, a30) = 3.4406;
+        distance(a29, a28) = 3.4406;
+        distance(a28, a29) = 3.4406;
+        distance(a28, a27) = 3.4406;
+        distance(a27, a28) = 3.4406;
+        distance(a27, a26) = 3.4406;
+        distance(a26, a27) = 3.4406;
+        distance(a26, a25) = 3.4406;
+        distance(a25, a26) = 3.4406;
+        
+        // Aisle 5 internal
+        distance(a33, a34) = 3.4406;
+        distance(a34, a33) = 3.4406;
+        distance(a34, a35) = 3.4406;
+        distance(a35, a34) = 3.4406;
+        distance(a35, a36) = 3.4406;
+        distance(a36, a35) = 3.4406;
+        distance(a36, a37) = 3.4406;
+        distance(a37, a36) = 3.4406;
+        distance(a37, a38) = 3.4406;
+        distance(a38, a37) = 3.4406;
+        distance(a38, a39) = 3.4406;
+        distance(a39, a38) = 3.4406;
+        distance(a39, a40) = 3.4406;
+        distance(a40, a39) = 3.4406;
+       
+        // Zigzag transitions
+        distance(a24, a32) = 7.7689;
+        distance(a32, a24) = 7.7689;
+        distance(a25, a33) = 7.4830;
+        distance(a33, a25) = 7.4830;
+        
+        // Unload2 connections
+        distance(a21, unload1) = 22.1807;  
+        distance(unload1, a21) = 22.1807; 
+        distance(a24, unload2) = 8.3345;
+        distance(unload2, a24) = 8.3345;
+        distance(a32, unload2) = 4.3345;
+        distance(unload2, a32) = 4.3345;
+        distance(a40, unload2) = 1.5160;
+        distance(unload2, a40) = 1.5160;
+        distance(a25, unload1) = 12.4185;
+        distance(unload1, a25) = 12.4185;
+        distance(a33, unload1) = 15.8345;
+        distance(unload1, a33) = 15.8345;
+        
+        
+        // Robot parameters
+        GRASP_SUCCESS_PROB = 0.91;
+        MAX_CAPACITY = 45.0;
+        CAPACITY_THRESHOLD = 40.0;
+
+        // fruit properties
+        fruit_weight(l65) = 0.8;
+        fruit_weight(l66) = 1.2;
+        fruit_weight(l67) = 1.0;
+        fruit_weight(l68) = 0.7;
+        fruit_weight(l69) = 0.6;
+        fruit_weight(l70) = 1.0;
+        fruit_weight(l71) = 1.4;
+        fruit_weight(l72) = 1.2;
+        fruit_weight(l73) = 1.2;
+        fruit_weight(l74) = 1.3;
+        fruit_weight(l75) = 1.2;
+        fruit_weight(l76) = 1.0;
+        fruit_weight(l77) = 0.7;
+        fruit_weight(l78) = 0.6;
+        fruit_weight(l79) = 0.8;
+        fruit_weight(l80) = 1.6;
+        fruit_weight(l81) = 0.6;
+        fruit_weight(l82) = 1.0;
+        fruit_weight(l83) = 0.6;
+        fruit_weight(l84) = 0.3;
+        fruit_weight(l85) = 1.5;
+        fruit_weight(l86) = 0.7;
+        fruit_weight(l87) = 1.6;
+        fruit_weight(l88) = 0.6;
+        fruit_weight(l89) = 1.0;
+        fruit_weight(l90) = 0.8;
+        fruit_weight(l91) = 1.4;
+        fruit_weight(l92) = 1.8;
+        fruit_weight(l93) = 0.6;
+        fruit_weight(l94) = 1.7;
+        fruit_weight(l95) = 1.1;
+        fruit_weight(l96) = 1.9;
+        fruit_weight(l97) = 1.1;
+        fruit_weight(l98) = 1.3;
+        fruit_weight(l99) = 1.2;
+        fruit_weight(l100) = 1.5;
+        fruit_weight(l101) = 1.9;
+        fruit_weight(l102) = 1.2;
+        fruit_weight(l103) = 1.4;
+        fruit_weight(l104) = 1.3;
+        fruit_weight(l105) = 1.3;
+        fruit_weight(l106) = 1.6;
+        fruit_weight(l107) = 1.1;
+        fruit_weight(l108) = 1.1;
+        fruit_weight(l109) = 1.1;
+        fruit_weight(l110) = 0.7;
+        fruit_weight(l111) = 1.6;
+        fruit_weight(l112) = 1.5;
+        fruit_weight(l113) = 0.6;
+        fruit_weight(l114) = 0.9;
+        fruit_weight(l115) = 0.8;
+        fruit_weight(l116) = 0.8;
+        fruit_weight(l117) = 0.7;
+        fruit_weight(l118) = 1.2;
+        fruit_weight(l119) = 1.2;
+        fruit_weight(l120) = 1.1;
+        fruit_weight(l121) = 1.0;
+        fruit_weight(l122) = 0.8;
+        fruit_weight(l123) = 1.0;
+        fruit_weight(l124) = 1.3;
+        fruit_weight(l125) = 1.0;
+        fruit_weight(l126) = 1.4;
+        fruit_weight(l127) = 0.8;
+        fruit_weight(l128) = 1.8;
+
+        fruit_ripe(l65) = true;
+        fruit_ripe(l66) = false;  // unripe
+        fruit_ripe(l67) = true;
+        fruit_ripe(l68) = true;
+        fruit_ripe(l69) = true;
+        fruit_ripe(l70) = true;
+        fruit_ripe(l71) = true;
+        fruit_ripe(l72) = true;
+        fruit_ripe(l73) = true;
+        fruit_ripe(l74) = true;
+        fruit_ripe(l75) = true;
+        fruit_ripe(l76) = true;
+        fruit_ripe(l77) = true;
+        fruit_ripe(l78) = true;
+        fruit_ripe(l79) = true;
+        fruit_ripe(l80) = true;
+        fruit_ripe(l81) = true;
+        fruit_ripe(l82) = true;  // unripe /
+        fruit_ripe(l83) = true;
+        fruit_ripe(l84) = true;
+        fruit_ripe(l85) = true;
+        fruit_ripe(l86) = true;
+        fruit_ripe(l87) = true;
+        fruit_ripe(l88) = true;
+        fruit_ripe(l89) = true;
+        fruit_ripe(l90) = true;
+        fruit_ripe(l91) = true;
+        fruit_ripe(l92) = true;
+        fruit_ripe(l93) = true;
+        fruit_ripe(l94) = true;
+        fruit_ripe(l95) = true;
+        fruit_ripe(l96) = false;  // unripe
+        fruit_ripe(l97) = true;
+        fruit_ripe(l98) = true;
+        fruit_ripe(l99) = true;
+        fruit_ripe(l100) = true;
+        fruit_ripe(l101) = true;
+        fruit_ripe(l102) = true;
+        fruit_ripe(l103) = true;
+        fruit_ripe(l104) = true;
+        fruit_ripe(l105) = true;  // unripe /
+        fruit_ripe(l106) = true;
+        fruit_ripe(l107) = true;
+        fruit_ripe(l108) = true;
+        fruit_ripe(l109) = true;
+        fruit_ripe(l110) = true;
+        fruit_ripe(l111) = true;
+        fruit_ripe(l112) = true;
+        fruit_ripe(l113) = true;
+        fruit_ripe(l114) = true;
+        fruit_ripe(l115) = true;
+        fruit_ripe(l116) = false;  // unripe
+        fruit_ripe(l117) = true;
+        fruit_ripe(l118) = true;
+        fruit_ripe(l119) = true;
+        fruit_ripe(l120) = true;
+        fruit_ripe(l121) = true;
+        fruit_ripe(l122) = true;
+        fruit_ripe(l123) = true;
+        fruit_ripe(l124) = true;
+        fruit_ripe(l125) = true;
+        fruit_ripe(l126) = true;
+        fruit_ripe(l127) = true;  // unripe /
+        fruit_ripe(l128) = true;
     };
 }
 
-instance fruit_collection_inst_robot2 {
+instance fruit_inst_R2 {
     domain = fruit_collection_multi_aisle;
     non-fluents = fruit_robot2_nf;
 
     init-state {
-        robot_at(robot2, a7);
+        // ROBOT2: Starts at a21 (Aisle 3 partial)
+        robot_at(robot2, a40);
 
-        fruit_at(l5);
-        fruit_at(l6);
-        fruit_at(l7);
-        fruit_at(l8);
+        // All fruits initially present
+        fruit_at(l65);
+        fruit_at(l66);
+        fruit_at(l67);
+        fruit_at(l68);
+        fruit_at(l69);
+        fruit_at(l70);
+        fruit_at(l71);
+        fruit_at(l72);
+        fruit_at(l73);
+        fruit_at(l74);
+        fruit_at(l75);
+        fruit_at(l76);
+        fruit_at(l77);
+        fruit_at(l78);
+        fruit_at(l79);
+        fruit_at(l80);
+        fruit_at(l81);
+        fruit_at(l82);
+        fruit_at(l83);
+        fruit_at(l84);
+        fruit_at(l85);
+        fruit_at(l86);
+        fruit_at(l87);
+        fruit_at(l88);
+        fruit_at(l89);
+        fruit_at(l90);
+        fruit_at(l91);
+        fruit_at(l92);
+        fruit_at(l93);
+        fruit_at(l94);
+        fruit_at(l95);
+        fruit_at(l96);
+        fruit_at(l97);
+        fruit_at(l98);
+        fruit_at(l99);
+        fruit_at(l100);
+        fruit_at(l101);
+        fruit_at(l102);
+        fruit_at(l103);
+        fruit_at(l104);
+        fruit_at(l105);
+        fruit_at(l106);
+        fruit_at(l107);
+        fruit_at(l108);
+        fruit_at(l109);
+        fruit_at(l110);
+        fruit_at(l111);
+        fruit_at(l112);
+        fruit_at(l113);
+        fruit_at(l114);
+        fruit_at(l115);
+        fruit_at(l116);
+        fruit_at(l117);
+        fruit_at(l118);
+        fruit_at(l119);
+        fruit_at(l120);
+        fruit_at(l121);
+        fruit_at(l122);
+        fruit_at(l123);
+        fruit_at(l124);
+        fruit_at(l125);
+        fruit_at(l126);
+        fruit_at(l127);
+        fruit_at(l128);
     };
 
     max-nondef-actions = 1;
-    horizon = 120;
+    horizon = 230;
     discount = 1.0;
 }
+
