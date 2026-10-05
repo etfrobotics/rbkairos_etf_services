@@ -212,9 +212,9 @@ non-fluents fruit_robot1_nf {
         distance(unload2, a20) = 22.0967;
 
         // Robot parameters
-        GRASP_SUCCESS_PROB = 0.58;
-        MAX_CAPACITY = 55.0;
-        CAPACITY_THRESHOLD = 53.0;
+        GRASP_SUCCESS_PROB = 0.91;
+        MAX_CAPACITY = 45.0;
+        CAPACITY_THRESHOLD = 40.0;
 
         // fruit properties
         fruit_weight(l1) = 1.2;
@@ -294,27 +294,27 @@ non-fluents fruit_robot1_nf {
         fruit_ripe(l10) = true;
         fruit_ripe(l11) = true;
         fruit_ripe(l12) = true;
-        fruit_ripe(l13) = false;  // unripe
+        fruit_ripe(l13) = false;  // unripe /
         fruit_ripe(l14) = true;
         fruit_ripe(l15) = true;
         fruit_ripe(l16) = true;
         fruit_ripe(l17) = true;
         fruit_ripe(l18) = true;
         fruit_ripe(l19) = true;
-        fruit_ripe(l20) = true;
+        fruit_ripe(l20) = false;  // unripe
         fruit_ripe(l21) = true;
         fruit_ripe(l22) = true;
         fruit_ripe(l23) = true;
-        fruit_ripe(l24) = false;  // unripe
+        fruit_ripe(l24) = true;
         fruit_ripe(l25) = true;
         fruit_ripe(l26) = true;
         fruit_ripe(l27) = true;
         fruit_ripe(l28) = true;
-        fruit_ripe(l29) = true;
+        fruit_ripe(l29) = false;  // unripe /
         fruit_ripe(l30) = true;
         fruit_ripe(l31) = true;
         fruit_ripe(l32) = true;
-        fruit_ripe(l33) = false;  // unripe
+        fruit_ripe(l33) = true;
         fruit_ripe(l34) = true;
         fruit_ripe(l35) = true;
         fruit_ripe(l36) = true;
@@ -325,11 +325,11 @@ non-fluents fruit_robot1_nf {
         fruit_ripe(l41) = true;
         fruit_ripe(l42) = true;
         fruit_ripe(l43) = true;
-        fruit_ripe(l44) = true;
+        fruit_ripe(l44) = false;  // unripe
         fruit_ripe(l45) = true;
         fruit_ripe(l46) = true;
         fruit_ripe(l47) = true;
-        fruit_ripe(l48) = false;  // unripe
+        fruit_ripe(l48) = true;
         fruit_ripe(l49) = true;
         fruit_ripe(l50) = true;
         fruit_ripe(l51) = true;
@@ -344,7 +344,7 @@ non-fluents fruit_robot1_nf {
         fruit_ripe(l60) = true;
         fruit_ripe(l61) = true;
         fruit_ripe(l62) = true;
-        fruit_ripe(l63) = false;  // unripe
+        fruit_ripe(l63) = false;  // unripe /
         fruit_ripe(l64) = true;
     };
 }
