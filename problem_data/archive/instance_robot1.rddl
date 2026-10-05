@@ -1,0 +1,81 @@
+////////////////////////////////////////////////////////////////////
+// Single-robot instance — robot1, aisle 1 only
+// SIM-integration branch: per-robot PROST instance, max-nondef-actions=1
+// Reduced capacity (MAX_CAPACITY=3.5, CAPACITY_THRESHOLD=3.0) to
+// force the planner into multi-trip-to-unload behaviour.
+////////////////////////////////////////////////////////////////////
+
+non-fluents fruit_robot1_nf {
+    domain = fruit_collection_multi_aisle;
+
+    objects {
+        location      : {l1, l2, l3, l4};
+        aisle_position: {a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, unload};
+        robot         : {robot1};
+    };
+
+    non-fluents {
+
+        // === UNLOAD STATIONS ===
+        unload_station(unload);
+
+        // === ADJACENCY (aisle 1 only — robot1 cannot reach aisle 2) ===
+        adjacent(a1, a2);    adjacent(a2, a1);
+        adjacent(a2, a3);    adjacent(a3, a2);
+        adjacent(a3, a4);    adjacent(a4, a3);
+        adjacent(a4, a5);    adjacent(a5, a4);
+        adjacent(a5, a6);    adjacent(a6, a5);
+
+        // Connection to unload station (via a1)
+        adjacent(a1, unload); adjacent(unload, a1);
+
+        // === REACHABILITY (aisle 1 fruits) ===
+        reachable_from(l1, a3);
+        reachable_from(l2, a4);
+        reachable_from(l3, a5);
+        reachable_from(l4, a6);
+
+        // === DISTANCES (aisle 1) ===
+        distance(a1, a2)     = 3.000; distance(a2, a1)     = 3.000;
+        distance(a2, a3)     = 1.000; distance(a3, a2)     = 1.000;
+        distance(a3, a4)     = 1.000; distance(a4, a3)     = 1.000;
+        distance(a4, a5)     = 1.000; distance(a5, a4)     = 1.000;
+        distance(a5, a6)     = 1.000; distance(a6, a5)     = 1.000;
+        distance(a1, unload) = 3.000; distance(unload, a1) = 3.000;
+
+        // === ROBOT PARAMETERS ===
+        GRASP_SUCCESS_PROB = 0.65;
+        MAX_CAPACITY       = 3.5;
+        CAPACITY_THRESHOLD = 3.0;
+
+        // === FRUIT WEIGHTS (aisle 1) ===
+        fruit_weight(l1) = 1.6;
+        fruit_weight(l2) = 1.7;
+        fruit_weight(l3) = 1.7;
+        fruit_weight(l4) = 0.8;
+
+        // === FRUIT RIPENESS ===
+        fruit_ripe(l1) = true;
+        fruit_ripe(l2) = true;
+        fruit_ripe(l3) = true;
+        fruit_ripe(l4) = true;
+    };
+}
+
+instance fruit_collection_inst_robot1 {
+    domain = fruit_collection_multi_aisle;
+    non-fluents = fruit_robot1_nf;
+
+    init-state {
+        robot_at(robot1, a1);
+
+        fruit_at(l1);
+        fruit_at(l2);
+        fruit_at(l3);
+        fruit_at(l4);
+    };
+
+    max-nondef-actions = 1;
+    horizon = 120;
+    discount = 1.0;
+}

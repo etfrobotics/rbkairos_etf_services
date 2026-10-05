@@ -336,7 +336,7 @@ class ActionManagerNode:
         arr = list(req.input)
 
         if len(arr) != 6:
-            return ActionServerResponse(False, "Input must be float64[6] = [x,y,z,R,P,Y]")
+            return ActionServerResponse(False, "Input must be float64[6] = [x,y,z,R,P,Y]", 0.0, 0.0)
 
         timeout_s = float(req.timeout) if req.timeout > 0.0 else self.default_timeout
 
@@ -378,7 +378,7 @@ class ActionManagerNode:
             # If the feedback is not received in 1 second, the action is considered as failed
             real_ok = ok and self.feedback
         
-        return ActionServerResponse(ok, msg)
+        return ActionServerResponse(ok, msg, 0.0, 0.0)
         
 
 if __name__ == "__main__":

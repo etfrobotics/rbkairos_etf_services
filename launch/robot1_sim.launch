@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="dry_run"        default="true"  />
+  <arg name="dry_run"        default="false"  />
   <arg name="domain_name"    default="fruit_collection_domain.rddl" />
   <arg name="prost_path"     default="$(find prost_ros)/prost/prost.py" />
   <arg name="search_engine"  default="[Prost -s 1 -se [IPC2014 -t 1.0]]" />
